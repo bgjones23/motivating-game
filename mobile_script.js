@@ -28,21 +28,20 @@ document.addEventListener('DOMContentLoaded', function() {
         "Let's goooooo"
     ];
 
+    var moveDirection = null;
+
     document.addEventListener('touchstart', function(e) {
         if (!gameStarted) {
             gameStarted = true;
             update();
         }
+
+        var touch = e.touches[0];
+        moveDirection = touch.clientX < canvas.width / 2 ? 'left' : 'right';
     });
 
-    document.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-        var touch = e.touches[0];
-        if (touch.clientX < canvas.width / 2) {
-            player.x -= player.dx;
-        } else {
-            player.x += player.dx;
-        }
+    document.addEventListener('touchend', function(e) {
+        moveDirection = null;
     });
 
     function spawnObstacle() {
@@ -79,6 +78,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Move player
+        if (moveDirection === 'left') player.x -= player.dx;
+        if (moveDirection === 'right') player.x += player.dx;
+
         // Keep player within canvas
         if (player.x < 0) player.x = 0;
         if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
@@ -100,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Display a random motivational message
                 ctx.fillStyle = "black";
-                ctx.font = "40px Arial";
+                ctx.font = "30px Arial";
                 ctx.textAlign = "center";
                 var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
                 ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
@@ -119,4 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
             requestAnimationFrame(update);
         }
     }
+
+    // Start the initial state
+    update();
 });
