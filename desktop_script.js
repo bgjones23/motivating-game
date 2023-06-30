@@ -29,12 +29,13 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
     
     document.addEventListener("keydown", function(event) {
-        if (!gameStarted && event.key === "ArrowRight" || event.key === "ArrowLeft") {
+        if (!gameStarted && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
             gameStarted = true;
             update();
+        } else {
+            if(event.key === "ArrowRight") player.x += player.dx;
+            if(event.key === "ArrowLeft") player.x -= player.dx;
         }
-        if(event.key === "ArrowRight") player.x += player.dx;
-        if(event.key === "ArrowLeft") player.x -= player.dx;
     });
 
     function spawnObstacle() {
@@ -107,7 +108,4 @@ document.addEventListener('DOMContentLoaded', function() {
             requestAnimationFrame(update);
         }
     }
-
-    // Start the game loop
-    update();
 });
