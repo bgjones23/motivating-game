@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     var canvas = document.getElementById("gameCanvas");
     canvas.width = 360;
     canvas.height = 640;
@@ -40,13 +40,16 @@ document.addEventListener('DOMContentLoaded', function () {
         ctx.fillText(moveInstruction, canvas.width / 2, canvas.height / 2 + 40);
     }
 
-    document.addEventListener("keydown", function () {
+    document.addEventListener("keydown", function() {
         gameStarted = true;
     });
 
-    canvas.addEventListener('touchstart', function (e) {
+    canvas.addEventListener('touchstart', function(e) {
         if (!gameStarted) {
             gameStarted = true;
+            return;
+        }
+        if(gameOver) {
             return;
         }
         var touch = e.touches[0];
@@ -58,17 +61,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }, false);
 
     function spawnObstacle() {
+        if(gameOver) {
+            return;
+        }
         var size = 20;
         var x = Math.random() * (canvas.width - size);
         var y = 0;
-        obstacles.push({ x, y, size });
+        obstacles.push({x, y, size});
     }
 
     function collisionDetected(rect1, rect2) {
         return rect1.x < rect2.x + rect2.size &&
-            rect1.x + rect1.size > rect2.x &&
-            rect1.y < rect2.y + rect2.size &&
-            rect1.y + rect1.size > rect2.y;
+               rect1.x + rect1.size > rect2.x &&
+               rect1.y < rect2.y + rect2.size &&
+               rect1.y + rect1.size > rect2.y;
     }
 
     function resetGame() {
@@ -117,13 +123,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Spawn new obstacles
-        if (Math.random() < 0.05) spawnObstacle();
+        if (!gameOver && Math.random() < 0.05) spawnObstacle();
 
         // Request next animation frame
-        if (!gameOver) {
-            requestAnimationFrame(update);
-        }
+        requestAnimationFrame(update);
     }
 
+    // Start the game loop
     update();
 });
