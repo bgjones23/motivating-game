@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     var startMessage = isMobile ? "Tap to start" : "Press any key to start";
-    var moveInstruction = isMobile ? "Tap left or right to move" : "Use arrow keys to move";
+    var moveInstruction = isMobile ? "Tap left or right of the blue square to move" : "Use arrow keys to move";
 
     var motivationalMessages = [
         "Motivate",
@@ -44,25 +44,25 @@ document.addEventListener('DOMContentLoaded', function () {
         gameStarted = true;
     });
 
-    canvas.addEventListener('touchstart', function () {
-        gameStarted = true;
-    });
-
-    document.addEventListener("keydown", function (event) {
-        if (event.key === "ArrowRight" && player.x < canvas.width - player.size) player.x += 10;
-        if (event.key === "ArrowLeft" && player.x > 0) player.x -= 10;
-    });
-
     canvas.addEventListener('touchstart', function (e) {
+        if (!gameStarted) {
+            gameStarted = true;
+            return;
+        }
         var touch = e.touches[0];
-        if (gameStarted) {
-            if (touch.clientX < player.x) {
-                player.x -= 10;
-            } else {
-                player.x += 10;
-            }
+        if (touch.clientX < player.x && player.x > 0) {
+            player.x -= 10;
+        } else if (touch.clientX > player.x && player.x < canvas.width - player.size) {
+            player.x += 10;
         }
     }, false);
+
+    function spawnObstacle() {
+        var size = 20;
+        var x = Math.random() * (canvas.width - size);
+        var y = 0;
+        obstacles.push({ x, y, size });
+    }
 
     function collisionDetected(rect1, rect2) {
         return rect1.x < rect2.x + rect2.size &&
@@ -102,14 +102,14 @@ document.addEventListener('DOMContentLoaded', function () {
             // Check for collisions
             if (collisionDetected(player, obs)) {
                 gameOver = true;
-                
+
                 // Display a random motivational message
                 ctx.fillStyle = "black";
                 ctx.font = "40px Arial";
                 ctx.textAlign = "center";
                 var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
                 ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
-                
+
                 // Reset the game after 2 seconds
                 setTimeout(resetGame, 2000);
                 return;
@@ -125,6 +125,5 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Start the game loop
     update();
 });
