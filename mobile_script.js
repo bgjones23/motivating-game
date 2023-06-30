@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.addEventListener('touchmove', function(e) {
+        e.preventDefault();
         var touch = e.touches[0];
         if (touch.clientX < canvas.width / 2) {
             player.x -= player.dx;
