@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     var startMessage = isMobile ? "Tap to start" : "Press any key to start";
-    var moveInstruction = isMobile ? "Tap left or right of the blue square to move" : "Use arrow keys to move";
+    var moveInstruction = isMobile ? "Tap left or right to move" : "Use arrow keys to move";
 
     var motivationalMessages = [
         "Motivate",
