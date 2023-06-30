@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var obstacles = [];
     var gameOver = false;
     var gameStarted = false;
+    var gameLoopRunning = false;
 
     var motivationalMessages = [
         "Motivate",
@@ -32,9 +33,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.addEventListener("keydown", function(event) {
         keys[event.key] = true;
-        if (!gameStarted && event.key === "ArrowRight" || event.key === "ArrowLeft") {
+        if (!gameStarted && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
             gameStarted = true;
-            update();
+            if (!gameLoopRunning) {
+                gameLoopRunning = true;
+                update();
+            }
         }
     });
 
@@ -62,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
         obstacles = [];
         gameOver = false;
         gameStarted = false;
+        gameLoopRunning = false;
     }
 
     function update() {
@@ -101,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Display a random motivational message
                 ctx.fillStyle = "black";
-                ctx.font = "30px Arial";
+                ctx.font = "40px Arial";
                 ctx.textAlign = "center";
                 var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
                 ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
@@ -120,7 +125,4 @@ document.addEventListener('DOMContentLoaded', function() {
             requestAnimationFrame(update);
         }
     }
-
-    // Start the initial state
-    update();
 });
