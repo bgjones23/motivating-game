@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     var canvas = document.getElementById("gameCanvas");
     canvas.width = 480;
     canvas.height = 320;
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
         x: 50,
         y: canvas.height - 25,
         size: 20,
-        dy: 2
+        dx: 5
     };
 
     var obstacles = [];
@@ -27,28 +27,28 @@ document.addEventListener('DOMContentLoaded', function () {
         "Let's gooo",
         "Let's goooooo"
     ];
-
-    document.addEventListener("keydown", function (event) {
-        if (!gameStarted && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
+    
+    document.addEventListener("keydown", function(event) {
+        if (!gameStarted && event.key === "ArrowRight" || event.key === "ArrowLeft") {
             gameStarted = true;
             update();
         }
-        if (event.key === "ArrowRight") player.x += 10;
-        if (event.key === "ArrowLeft") player.x -= 10;
+        if(event.key === "ArrowRight") player.x += player.dx;
+        if(event.key === "ArrowLeft") player.x -= player.dx;
     });
 
     function spawnObstacle() {
         var size = 20;
         var x = Math.random() * (canvas.width - size);
         var y = 0;
-        obstacles.push({ x, y, size });
+        obstacles.push({x, y, size});
     }
 
     function collisionDetected(rect1, rect2) {
         return rect1.x < rect2.x + rect2.size &&
-            rect1.x + rect1.size > rect2.x &&
-            rect1.y < rect2.y + rect2.size &&
-            rect1.y + rect1.size > rect2.y;
+               rect1.x + rect1.size > rect2.x &&
+               rect1.y < rect2.y + rect2.size &&
+               rect1.y + rect1.size > rect2.y;
     }
 
     function resetGame() {
@@ -64,10 +64,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!gameStarted) {
             ctx.fillStyle = "black";
-            ctx.font = "30px Arial";
+            ctx.font = "20px Arial";
             ctx.textAlign = "center";
             ctx.fillText("Press any key to start", canvas.width / 2, canvas.height / 2);
-            ctx.fillText("Use arrow keys to move", canvas.width / 2, canvas.height / 2 + 40);
+            ctx.fillText("Use arrow keys to move", canvas.width / 2, canvas.height / 2 + 30);
             return;
         }
 
@@ -85,14 +85,14 @@ document.addEventListener('DOMContentLoaded', function () {
             // Check for collisions
             if (collisionDetected(player, obs)) {
                 gameOver = true;
-
+                
                 // Display a random motivational message
                 ctx.fillStyle = "black";
                 ctx.font = "40px Arial";
                 ctx.textAlign = "center";
                 var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
                 ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
-
+                
                 // Reset the game after 2 seconds
                 setTimeout(resetGame, 2000);
                 return;
@@ -107,4 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
             requestAnimationFrame(update);
         }
     }
+
+    // Start the game loop
+    update();
 });
