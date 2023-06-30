@@ -1,20 +1,21 @@
 document.addEventListener('DOMContentLoaded', function () {
     var canvas = document.getElementById("gameCanvas");
-    canvas.width = 360;
-    canvas.height = 640;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     var ctx = canvas.getContext("2d");
 
     var player = {
-        x: 150,
-        y: canvas.height - 30,
-        size: 20,
-        dx: 20,
-        dy: 2
+        x: 50,
+        y: canvas.height - 50,
+        size: 40,
+        dx: 5
     };
 
     var obstacles = [];
     var gameOver = false;
     var gameStarted = false;
+    var movingLeft = false;
+    var movingRight = false;
 
     var motivationalMessages = [
         "Motivate",
@@ -29,26 +30,27 @@ document.addEventListener('DOMContentLoaded', function () {
         "Let's goooooo"
     ];
 
-    canvas.addEventListener('touchstart', function () {
+    canvas.addEventListener('touchstart', function (e) {
         if (!gameStarted) {
             gameStarted = true;
             update();
-        } else {
-            player.x -= 10;
         }
-    });
+
+        var touch = e.touches[0];
+        if (touch.clientX < canvas.width / 2) {
+            movingLeft = true;
+        } else {
+            movingRight = true;
+        }
+    }, false);
 
     canvas.addEventListener('touchend', function (e) {
-        var touch = e.changedTouches[0];
-        if (touch.clientX < canvas.width / 2) {
-            player.x -= player.dx;
-        } else {
-            player.x += player.dx;
-        }
-    });
+        movingLeft = false;
+        movingRight = false;
+    }, false);
 
     function spawnObstacle() {
-        var size = 20;
+        var size = 40;
         var x = Math.random() * (canvas.width - size);
         var y = 0;
         obstacles.push({ x, y, size });
@@ -62,8 +64,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function resetGame() {
-        player.x = 150;
-        player.y = canvas.height - 30;
+        player.x = 50;
+        player.y = canvas.height - 50;
         obstacles = [];
         gameOver = false;
         gameStarted = false;
@@ -80,6 +82,9 @@ document.addEventListener('DOMContentLoaded', function () {
             ctx.fillText("Tap left or right of blue square to move", canvas.width / 2, canvas.height / 2 + 40);
             return;
         }
+
+        if (movingLeft) player.x -= player.dx;
+        if (movingRight) player.x += player.dx;
 
         // Draw player
         ctx.fillStyle = "blue";
@@ -117,4 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
             requestAnimationFrame(update);
         }
     }
+
+    // Start the game loop
+    update();
 });
