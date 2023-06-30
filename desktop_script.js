@@ -8,13 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
         x: 50,
         y: canvas.height - 25,
         size: 20,
-        dx: 5
+        dx: 0
     };
 
     var obstacles = [];
     var gameOver = false;
     var gameStarted = false;
-    var gameLoopRunning = false;
 
     var motivationalMessages = [
         "Motivate",
@@ -33,12 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.addEventListener("keydown", function(event) {
         keys[event.key] = true;
-        if (!gameStarted && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
+        if (!gameStarted) {
             gameStarted = true;
-            if (!gameLoopRunning) {
-                gameLoopRunning = true;
-                update();
-            }
+            update();
         }
     });
 
@@ -63,10 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetGame() {
         player.x = 50;
         player.y = canvas.height - 25;
+        player.dx = 0;
         obstacles = [];
         gameOver = false;
         gameStarted = false;
-        gameLoopRunning = false;
     }
 
     function update() {
@@ -82,8 +78,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Move player
-        if (keys["ArrowLeft"]) player.x -= player.dx;
-        if (keys["ArrowRight"]) player.x += player.dx;
+        if (keys["ArrowLeft"]) player.dx = -5;
+        else if (keys["ArrowRight"]) player.dx = 5;
+        else player.dx = 0;
+
+        player.x += player.dx;
 
         // Keep player within canvas
         if (player.x < 0) player.x = 0;
@@ -125,4 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
             requestAnimationFrame(update);
         }
     }
+
+    // Start the game loop
+    update();
 });
