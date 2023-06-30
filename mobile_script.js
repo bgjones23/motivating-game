@@ -1,21 +1,19 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     var canvas = document.getElementById("gameCanvas");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth - 10;
+    canvas.height = window.innerHeight - 20;
     var ctx = canvas.getContext("2d");
 
     var player = {
         x: 50,
-        y: canvas.height - 50,
-        size: 40,
+        y: canvas.height - 25,
+        size: 20,
         dx: 5
     };
 
     var obstacles = [];
     var gameOver = false;
     var gameStarted = false;
-    var movingLeft = false;
-    var movingRight = false;
 
     var motivationalMessages = [
         "Motivate",
@@ -30,42 +28,39 @@ document.addEventListener('DOMContentLoaded', function () {
         "Let's goooooo"
     ];
 
-    canvas.addEventListener('touchstart', function (e) {
+    document.addEventListener('touchstart', function(e) {
         if (!gameStarted) {
             gameStarted = true;
             update();
         }
+    });
 
+    document.addEventListener('touchmove', function(e) {
         var touch = e.touches[0];
         if (touch.clientX < canvas.width / 2) {
-            movingLeft = true;
+            player.x -= player.dx;
         } else {
-            movingRight = true;
+            player.x += player.dx;
         }
-    }, false);
-
-    canvas.addEventListener('touchend', function (e) {
-        movingLeft = false;
-        movingRight = false;
-    }, false);
+    });
 
     function spawnObstacle() {
-        var size = 40;
+        var size = 20;
         var x = Math.random() * (canvas.width - size);
         var y = 0;
-        obstacles.push({ x, y, size });
+        obstacles.push({x, y, size});
     }
 
     function collisionDetected(rect1, rect2) {
         return rect1.x < rect2.x + rect2.size &&
-            rect1.x + rect1.size > rect2.x &&
-            rect1.y < rect2.y + rect2.size &&
-            rect1.y + rect1.size > rect2.y;
+               rect1.x + rect1.size > rect2.x &&
+               rect1.y < rect2.y + rect2.size &&
+               rect1.y + rect1.size > rect2.y;
     }
 
     function resetGame() {
         player.x = 50;
-        player.y = canvas.height - 50;
+        player.y = canvas.height - 25;
         obstacles = [];
         gameOver = false;
         gameStarted = false;
@@ -76,15 +71,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!gameStarted) {
             ctx.fillStyle = "black";
-            ctx.font = "30px Arial";
+            ctx.font = "20px Arial";
             ctx.textAlign = "center";
             ctx.fillText("Tap to start", canvas.width / 2, canvas.height / 2);
-            ctx.fillText("Tap left or right of blue square to move", canvas.width / 2, canvas.height / 2 + 40);
+            ctx.fillText("Tap left or right of blue square to move", canvas.width / 2, canvas.height / 2 + 30);
             return;
         }
 
-        if (movingLeft) player.x -= player.dx;
-        if (movingRight) player.x += player.dx;
+        // Keep player within canvas
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
 
         // Draw player
         ctx.fillStyle = "blue";
@@ -122,7 +118,4 @@ document.addEventListener('DOMContentLoaded', function () {
             requestAnimationFrame(update);
         }
     }
-
-    // Start the game loop
-    update();
 });
