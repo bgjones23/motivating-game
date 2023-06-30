@@ -1,19 +1,23 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     var canvas = document.getElementById("gameCanvas");
     canvas.width = 360;
     canvas.height = 640;
-    var ctx = canvas.getContext("2d");    
+    var ctx = canvas.getContext("2d");
 
     var player = {
-        x: 50,
-        y: canvas.height - 65,
-        size: 20,
-        dy: 2
+        x: 160,
+        y: canvas.height - 45,
+        size: 40
     };
 
     var obstacles = [];
     var gameOver = false;
     var gameStarted = false;
+
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    var startMessage = isMobile ? "Tap to start" : "Press any key to start";
+    var moveInstruction = isMobile ? "Tap left or right of the blue square to move" : "Use arrow keys to move";
 
     var motivationalMessages = [
         "Motivate",
@@ -27,60 +31,60 @@ document.addEventListener('DOMContentLoaded', function() {
         "Let's gooo",
         "Let's goooooo"
     ];
-    
-    function startGame() {
-        gameStarted = true;
-        update();
+
+    function displayStartScreen() {
+        ctx.fillStyle = "black";
+        ctx.font = "30px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(startMessage, canvas.width / 2, canvas.height / 2);
+        ctx.fillText(moveInstruction, canvas.width / 2, canvas.height / 2 + 40);
     }
 
-    document.addEventListener("keydown", function(event) {
-        if (!gameStarted) {
-            startGame();
-        } else {
-            var newX = player.x;
-            if(event.key === "ArrowRight") newX += 10;
-            if(event.key === "ArrowLeft") newX -= 10;
-            
-            // Check if new position is within bounds
-            if (newX >= 0 && newX <= canvas.width - player.size) {
-                player.x = newX;
-            }
-        }
+    document.addEventListener("keydown", function () {
+        gameStarted = true;
     });
 
-    function spawnObstacle() {
-        var size = 20;
-        var x = Math.random() * (canvas.width - size);
-        var y = 0;
-        obstacles.push({x, y, size});
-    }
+    canvas.addEventListener('touchstart', function () {
+        gameStarted = true;
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "ArrowRight" && player.x < canvas.width - player.size) player.x += 10;
+        if (event.key === "ArrowLeft" && player.x > 0) player.x -= 10;
+    });
+
+    canvas.addEventListener('touchstart', function (e) {
+        var touch = e.touches[0];
+        if (gameStarted) {
+            if (touch.clientX < player.x) {
+                player.x -= 10;
+            } else {
+                player.x += 10;
+            }
+        }
+    }, false);
 
     function collisionDetected(rect1, rect2) {
         return rect1.x < rect2.x + rect2.size &&
-               rect1.x + rect1.size > rect2.x &&
-               rect1.y < rect2.y + rect2.size &&
-               rect1.y + rect1.size > rect2.y;
+            rect1.x + rect1.size > rect2.x &&
+            rect1.y < rect2.y + rect2.size &&
+            rect1.y + rect1.size > rect2.y;
     }
 
     function resetGame() {
-        player.x = 50;
-        player.y = canvas.height - 65;
+        player.x = 160;
+        player.y = canvas.height - 45;
         obstacles = [];
         gameOver = false;
         gameStarted = false;
-        update();
     }
 
     function update() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (!gameStarted) {
-            // Display the initial message
-            ctx.fillStyle = "black";
-            ctx.font = "20px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText("Press any key to start", canvas.width / 2, canvas.height / 2);
-            ctx.fillText("Use arrow keys to move", canvas.width / 2, canvas.height / 2 + 30);
+            displayStartScreen();
+            requestAnimationFrame(update);
             return;
         }
 
