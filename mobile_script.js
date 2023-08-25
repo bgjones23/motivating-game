@@ -158,9 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ctx.textAlign = "center";
                     var randomMessage =
                         motivationalMessages[
-                            Math.floor(
-                                Math.random() * motivationalMessages.length
-                            )
+                            Math.floor(Math.random() * motivationalMessages.length)
                         ];
                     ctx.fillText(
                         randomMessage,
@@ -172,7 +170,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     setTimeout(resetGame, 2000);
                     return;
                 }
-
                 obstacles.splice(i, 1);
                 i--;
             }
@@ -180,17 +177,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Spawn new obstacles
         if (Math.random() < obstacleSpawnRate) {
-            if (Math.random() < 0.1) {
+            if (wave % 3 === 0) {
                 spawnPurpleObstacle();
             } else {
                 spawnObstacle();
             }
         }
 
-        // Draw timer and wave
+        // Draw score and timer
         ctx.fillStyle = "white";
-        ctx.fillRect(canvas.width - 120, 10, 110, 30);
-        ctx.fillStyle = "black";
         ctx.font = "20px Arial";
         ctx.textAlign = "right";
         ctx.fillText("Time: " + timer + "s", canvas.width - 10, 30);
