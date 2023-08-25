@@ -45,6 +45,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var touch = e.touches[0];
         moveDirection = touch.clientX < canvas.width / 2 ? 'left' : 'right';
+
+        // Check for up or down touch
+        if (touch.clientY < canvas.height / 2) {
+            moveDirection = 'up';
+        } else {
+            moveDirection = 'down';
+        }
     });
 
     document.addEventListener('touchend', function(e) {
@@ -102,21 +109,19 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.font = "20px Arial";
             ctx.textAlign = "center";
             ctx.fillText("Tap to start", canvas.width / 2, canvas.height / 2);
-            ctx.fillText("Tap left or right of blue square to move", canvas.width / 2, canvas.height / 2 + 30);
+            ctx.fillText("Tap left, right, up, or down to move", canvas.width / 2, canvas.height / 2 + 30);
             return;
         }
 
         // Move player
         if (moveDirection === 'left') player.x -= player.dx;
         if (moveDirection === 'right') player.x += player.dx;
+        if (moveDirection === 'up') player.y -= player.dy;
+        if (moveDirection === 'down') player.y += player.dy;
 
         // Keep player within canvas
         if (player.x < 0) player.x = 0;
         if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
-
-        if (moveDirection === 'up') player.y -= player.dy;
-        if (moveDirection === 'down') player.y += player.dy;
-
         if (player.y < 0) player.y = 0;
         if (player.y + player.size > canvas.height) player.y = canvas.height - player.size;
 
