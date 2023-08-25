@@ -8,12 +8,20 @@ document.addEventListener('DOMContentLoaded', function() {
         x: 50,
         y: canvas.height - 25,
         size: 20,
-        dx: 5
+        dx: 5,
+        dy: 5
     };
 
     var obstacles = [];
-    var gameOver = false;
+    var timer = 100;
+    var gameClock = 0;
+    var wave = 1;
     var gameStarted = false;
+    var moveDirection = null;
+
+    var speedIncreaseFactor = 1.1; // 10% faster
+    var obstacleSpawnRate = 0.05;
+    var obstacleIncreaseFactor = 1.1; // 10% more obstacles every 3rd wave
 
     var motivationalMessages = [
         "Motivate",
@@ -28,11 +36,10 @@ document.addEventListener('DOMContentLoaded', function() {
         "Let's goooooo"
     ];
 
-    var moveDirection = null;
-
     document.addEventListener('touchstart', function(e) {
         if (!gameStarted) {
             gameStarted = true;
+            setInterval(updateGameClock, 1000);
             update();
         }
 
@@ -51,6 +58,13 @@ document.addEventListener('DOMContentLoaded', function() {
         obstacles.push({x, y, size});
     }
 
+    function spawnPurpleObstacle() {
+        var size = 20;
+        var x = Math.random() * (canvas.width - size);
+        var y = 0;
+        obstacles.push({x, y, size, color: "purple"});
+    }
+
     function collisionDetected(rect1, rect2) {
         return rect1.x < rect2.x + rect2.size &&
                rect1.x + rect1.size > rect2.x &&
@@ -58,11 +72,25 @@ document.addEventListener('DOMContentLoaded', function() {
                rect1.y + rect1.size > rect2.y;
     }
 
+    function updateGameClock() {
+        gameClock++;
+        if (gameClock % 10 === 0) {
+            // New wave every 10 seconds
+            wave++;
+            if (wave % 3 === 0) {
+                obstacleSpawnRate *= obstacleIncreaseFactor;
+            }
+            console.log("New wave: " + wave);
+        }
+    }
+
     function resetGame() {
         player.x = 50;
         player.y = canvas.height - 25;
         obstacles = [];
-        gameOver = false;
+        timer = 100;
+        gameClock = 0;
+        wave = 1;
         gameStarted = false;
     }
 
@@ -86,41 +114,67 @@ document.addEventListener('DOMContentLoaded', function() {
         if (player.x < 0) player.x = 0;
         if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
 
+        if (moveDirection === 'up') player.y -= player.dy;
+        if (moveDirection === 'down') player.y += player.dy;
+
+        if (player.y < 0) player.y = 0;
+        if (player.y + player.size > canvas.height) player.y = canvas.height - player.size;
+
         // Draw player
         ctx.fillStyle = "blue";
         ctx.fillRect(player.x, player.y, player.size, player.size);
 
         // Draw obstacles
-        ctx.fillStyle = "red";
         for (var i = 0; i < obstacles.length; i++) {
             var obs = obstacles[i];
             obs.y += 5;
+            ctx.fillStyle = obs.color || "red";
             ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
 
             // Check for collisions
             if (collisionDetected(player, obs)) {
-                gameOver = true;
+                if (obs.color === "purple") {
+                    timer += 10;
+                } else {
+                    gameOver = true;
 
-                // Display a random motivational message
-                ctx.fillStyle = "black";
-                ctx.font = "30px Arial";
-                ctx.textAlign = "center";
-                var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
-                ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
+                    // Display a random motivational message
+                    ctx.fillStyle = "black";
+                    ctx.font = "30px Arial";
+                    ctx.textAlign = "center";
+                    var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+                    ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
 
-                // Reset the game after 2 seconds
-                setTimeout(resetGame, 2000);
-                return;
+                    // Reset the game after 2 seconds
+                    setTimeout(resetGame, 2000);
+                    return;
+                }
+
+                obstacles.splice(i, 1);
+                i--;
             }
         }
 
         // Spawn new obstacles
-        if (Math.random() < 0.05) spawnObstacle();
+        if (Math.random() < obstacleSpawnRate) {
+            if (Math.random() < 0.1) {
+                spawnPurpleObstacle();
+            } else {
+                spawnObstacle();
+            }
+        }
+
+        // Draw timer and wave
+        ctx.fillStyle = "white";
+        ctx.fillRect(canvas.width - 120, 10, 110, 30);
+        ctx.fillStyle = "black";
+        ctx.font = "18px Arial";
+        ctx.textAlign = "right";
+        ctx.fillText(`Time: ${timer}s`, canvas.width - 15, 30);
+        ctx.fillText(`Wave: ${wave}`, canvas.width - 15, 50);
 
         // Request next animation frame
-        if (!gameOver) {
-            requestAnimationFrame(update);
-        }
+        requestAnimationFrame(update);
     }
 
     // Start the initial state
