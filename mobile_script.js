@@ -198,6 +198,23 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(update);
     }
 
+    // Add joystick controls
+    canvas.addEventListener("touchstart", function (e) {
+        var touch = e.touches[0];
+        var angle = getAngle(
+            touch.clientX - player.x - player.size / 2,
+            touch.clientY - player.y - player.size / 2
+        );
+        var direction = calculateDirection(angle);
+        player.dx = direction.dx;
+        player.dy = direction.dy;
+    });
+
+    canvas.addEventListener("touchend", function () {
+        player.dx = 0;
+        player.dy = 0;
+    });
+
     // Start the initial state
     update();
 });
