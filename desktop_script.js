@@ -42,16 +42,29 @@ document.addEventListener('DOMContentLoaded', function() {
         "Keep going",
         "Nation!",
         "Sweet",
-        "Righteous",
-        "Hole Lee Clow!",
         "Motivate, or else",
         "Time to go",
         "Get it",
         "Snap!",
-        "Leroy Jenkins!",
         "Sampsonite!",
         "C'mon!",
-        "Almoooooost!"
+        "Almoooooost!",
+        "In a world...",
+        "If not who but us?",
+        "If not now, then when?",
+        "Are you not entertained?!?",
+        "Seriously?",
+        "Dude.",
+        "Duuuuuuude.",
+        "dude",
+        "DUDE!",
+        "You do nice work.",
+        "noice",
+        "realllly noice",
+        "woah...",
+        "wooooooahh...",
+        "c'mon man!",
+        "are you motivated yet?"
     ];
 
     function displayCopyright() {
