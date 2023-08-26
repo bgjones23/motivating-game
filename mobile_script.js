@@ -22,7 +22,7 @@
                 x: canvas.width / 2,
                 y: canvas.height - 65,
                 size: 20,
-                speed: 5,
+                speed: 2, // Adjust the speed as needed
                 dx: 0,
                 dy: 0
             };
@@ -41,58 +41,92 @@
             var obstaclesPerWave = 5; // Initial number of obstacles per wave
 
             var motivationalMessages = [
-                // Motivational messages here...
+                "Motivate",
+                "Keep after it",
+                "You got this",
+                "Don't stop now",
+                "Believe",
+                "You can do it",
+                "Move faster",
+                "Let's go",
+                "Let's gooo",
+                "Let's goooooo",
+                "Almost!",
+                "So close!",
+                "Keep going",
+                "Nation!",
+                "Sweet",
+                "Righteous",
+                "Hole Lee Clow!",
+                "Motivate, or else",
+                "Time to go",
+                "Get it",
+                "Snap!",
+                "Leroy Jenkins!",
+                "Sampsonite!",
+                "C'mon!",
+                "Almoooooost!"
             ];
 
             function displayCopyright() {
-                // Copyright text here...
+                ctx.fillStyle = "black";
+                ctx.font = "10px Futura";
+                ctx.textAlign = "left";
+                ctx.fillText("©2023", 10, canvas.height - 10);
+
+                ctx.textAlign = "right";
+                ctx.fillText("created by Semper Ads--emotional advertising", canvas.width - 10, canvas.height - 10);
             }
 
             function startGame() {
                 // Start game logic here...
             }
 
-            // Additional touch controls code...
-            var touchStartX = 0;
-            var touchStartY = 0;
-
+            // Touch controls for left and right movement
             canvas.addEventListener('touchstart', function(event) {
                 if (!gameStarted) {
                     startGame();
                 } else {
-                    // Store the initial touch position
-                    touchStartX = event.touches[0].clientX;
-                    touchStartY = event.touches[0].clientY;
+                    var touchX = event.touches[0].clientX;
+                    if (touchX < player.x) {
+                        player.dx = -player.speed;
+                    } else if (touchX > player.x + player.size) {
+                        player.dx = player.speed;
+                    } else {
+                        player.dx = 0;
+                    }
                 }
             });
 
-            canvas.addEventListener('touchmove', function(event) {
-                // Calculate the change in touch position
-                var touchDeltaX = event.touches[0].clientX - touchStartX;
-                var touchDeltaY = event.touches[0].clientY - touchStartY;
-
-                // Update player's position based on touch movement
-                player.x += touchDeltaX * player.speed;
-                player.y += touchDeltaY * player.speed;
-
-                // Keep player within bounds
-                player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
-                player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
-
-                // Update touch start position for the next event
-                touchStartX = event.touches[0].clientX;
-                touchStartY = event.touches[0].clientY;
-            });
-
             canvas.addEventListener('touchend', function() {
-                // Stop the movement on touch release
-                player.dx = 0;
-                player.dy = 0;
+                // Stop movement on touch release
+                if (!gameOver && gameStarted) {
+                    player.dx = 0;
+                }
             });
 
-            // Rest of your code goes here...
-            // (please copy and paste your previous code here)
+            function spawnObstacle() {
+                // Spawn obstacle logic here...
+            }
 
+            function collisionDetected(rect1, rect2) {
+                // Collision detection logic here...
+            }
+
+            function updateHighScore() {
+                // Update high score logic here...
+            }
+
+            function resetGame() {
+                // Reset game logic here...
+            }
+
+            function update() {
+                // Update game logic here...
+            }
+
+            // Start the game loop
+            update();
         });
     </script>
 </body>
