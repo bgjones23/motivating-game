@@ -45,14 +45,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         var touch = e.touches[0];
-        moveDirection = touch.clientX < player.x ? 'left' : 'right';
+        var touchX = touch.clientX;
         var touchY = touch.clientY;
-        if (touchY > player.y + player.size) player.dy = player.speed;
-        if (touchY < player.y) player.dy = -player.speed;
+
+        if (touchX < player.x) {
+            moveDirection = 'left';
+            player.dx = -1;
+        } else if (touchX > player.x + player.size) {
+            moveDirection = 'right';
+            player.dx = 1;
+        }
+
+        if (touchY < player.y) {
+            player.dy = -1;
+        } else if (touchY > player.y + player.size) {
+            player.dy = 1;
+        }
     });
 
     document.addEventListener('touchend', function(e) {
         moveDirection = null;
+        player.dx = 0;
         player.dy = 0;
     });
 
@@ -102,9 +115,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update game clock and wave countdown
         gameClock++;
-        if (gameClock % 10 === 0) {
+        if (gameClock % 60 === 0) { // Update every second
+            timer--;
+            if (timer <= 0) {
+                resetGame();
+                return;
+            }
+
             waveCountdown--;
-            if (waveCountdown === 0) {
+            if (waveCountdown <= 0) {
                 waveNumber++;
                 waveCountdown = 10;
                 obstacleSpeed *= 1.1; // Increase obstacle speed by 10% every wave
@@ -152,11 +171,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     timer += 10;
                     obstacles.splice(i, 1);
                     i--;
+
+                } else if (obs.color === "purple") {
+                    timer += 5;
+                    obstacles.splice(i, 1);
+                    i--;
                 }
+            }
+
+            // Remove obstacles that go off-screen
+            if (obs.y > canvas.height) {
+                obstacles.splice(i, 1);
+                i--;
             }
         }
 
-        // Display countdown timer and wave number
+        // Display timer and wave information
         ctx.fillStyle = "black";
         ctx.font = "18px Arial";
         ctx.textAlign = "right";
