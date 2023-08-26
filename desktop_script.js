@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillText("copyright 2023", 10, canvas.height - 10);
 
         ctx.textAlign = "right";
-        ctx.fillText("created by Semper Ads...Always Be Advertising", canvas.width - 10, canvas.height - 10);
+        ctx.fillText("©2023 Semper Ads...emotional advertising", canvas.width - 10, canvas.height - 10);
     }
 
     function startGame() {
