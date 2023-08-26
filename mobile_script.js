@@ -49,6 +49,19 @@ document.addEventListener('DOMContentLoaded', function() {
     var points = 0;
     var highScore = localStorage.getItem('highScore') || 0;
 
+    var motivationalMessages = [
+        "Motivate",
+        "Keep after it",
+        "You got this",
+        "Don't stop now",
+        "Believe",
+        "You can do it",
+        "Move faster next time",
+        "Let's go",
+        "Let's gooo",
+        "Let's goooooo"
+    ];
+
     function spawnObstacle() {
         var size = 20;
         var x = Math.random() * (canvas.width - size);
@@ -147,6 +160,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (internalGameClock % 300 === 0) {
             wave++;
         }
+
+        // Display game info
+        ctx.fillStyle = "black";
+        ctx.font = "14px Arial";
+        ctx.textAlign = "right";
+        ctx.fillText(`Score: ${points}`, canvas.width - 10, 20);
+        ctx.fillText(`High Score: ${highScore}`, canvas.width - 10, 40);
+        ctx.fillText(`Time: ${timer}`, canvas.width - 10, 60);
+        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, 80);
 
         // Request next animation frame
         if (!gameOver) {
