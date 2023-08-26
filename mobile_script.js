@@ -170,11 +170,19 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillText(`Time: ${timer}`, canvas.width - 10, 60);
         ctx.fillText(`Wave: ${wave}`, canvas.width - 10, 80);
 
+     ctx.fillText(`High Score: ${highScore}`, canvas.width - 10, 40);
+        ctx.fillText(`Time: ${timer}`, canvas.width - 10, 60);
+        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, 80);
+
         // Request next animation frame
         if (!gameOver) {
             requestAnimationFrame(update);
         }
     }
+
+    // Start the initial state
+    update();
+});
 
     // Start the initial state
     update();
