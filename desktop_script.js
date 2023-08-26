@@ -71,10 +71,10 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillStyle = "black";
         ctx.font = "10px Futura";
         ctx.textAlign = "left";
-        ctx.fillText("copyright 2023", 10, canvas.height - 10);
+        ctx.fillText("©2023", 10, canvas.height - 10);
 
         ctx.textAlign = "right";
-        ctx.fillText("created by Semper Ads...Always Be Advertising", canvas.width - 10, canvas.height - 10);
+        ctx.fillText("Semper Ads...emotional advertising", canvas.width - 10, canvas.height - 10);
     }
 
     function startGame() {
@@ -170,8 +170,8 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.fillStyle = "black";
             ctx.font = "20px Futura";
             ctx.textAlign = "center";
-            ctx.fillText("Press any key to start", canvas.width / 2, canvas.height / 2);
-            ctx.fillText("Use arrow keys to move", canvas.width / 2, canvas.height / 2 + 30);
+            ctx.fillText("Tap somewhere to start", canvas.width / 2, canvas.height / 2);
+            ctx.fillText("Dodge red boxes", canvas.width / 2, canvas.height / 2 + 30);
             return;
         }
 
