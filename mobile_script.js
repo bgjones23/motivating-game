@@ -66,22 +66,14 @@ document.addEventListener('DOMContentLoaded', function() {
         var size = 20;
         var x = Math.random() * (canvas.width - size);
         var y = 0;
-
-        // Check if the obstacle would spawn outside of the canvas
-        if (x < 0 || x + size > canvas.width) {
-            return;
-        }
-
         obstacles.push({x, y, size});
     }
 
     function collisionDetected(rect1, rect2) {
         return rect1.x < rect2.x + rect2.size &&
-            rect1.x + rect1.size > rect2.x &&
-            rect1.y < rect2.y + rect2.size &&
-            rect1.y + rect1.size > rect2.y &&
-            !(rect1.x < rect2.x && rect1.x + rect1.size > rect2.x + rect2.size) &&
-            !(rect1.y < rect2.y && rect1.y + rect1.size > rect2.y + rect2.size);
+               rect1.x + rect1.size > rect2.x &&
+               rect1.y < rect2.y + rect2.size &&
+               rect1.y + rect1.size > rect2.y;
     }
 
     function resetGame() {
@@ -110,4 +102,71 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Move player
-        if (touchMoveDirection === 'left') player.x -= player.
+        if (touchMoveDirection === 'left') player.x -= player.dx;
+        if (touchMoveDirection === 'right') player.x += player.dx;
+
+        // Keep player within canvas
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
+
+        // Draw player
+        ctx.fillStyle = "blue";
+        ctx.fillRect(player.x, player.y, player.size, player.size);
+
+        // Draw obstacles
+        ctx.fillStyle = "red";
+        for (var i = 0; i < obstacles.length; i++) {
+            var obs = obstacles[i];
+            obs.y += 5 + wave; // Adjust wave speed
+            ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
+
+            // Check for collisions
+            if (collisionDetected(player, obs)) {
+                gameOver = true;
+
+                // Display a random motivational message
+                ctx.fillStyle = "black";
+                ctx.font = "30px Arial";
+                ctx.textAlign = "center";
+                var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+                ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
+
+                // Update high score
+                if (points > highScore) {
+                    highScore = points;
+                    localStorage.setItem('highScore', highScore);
+                }
+
+                // Reset the game after 2 seconds
+                setTimeout(resetGame, 2000);
+                return;
+            }
+        }
+
+        // Update internal game clock
+        internalGameClock++;
+
+        // Update timer every second
+        if (internalGameClock % 10 === 0 && timer > 0) {
+            timer--;
+        }
+
+        // Spawn new obstacles
+        if (internalGameClock % 30 === 0) {
+            spawnObstacle();
+        }
+
+        // Increase difficulty every 3 waves
+        if (internalGameClock % 300 === 0) {
+            wave++;
+        }
+
+        // Request next animation frame
+        if (!gameOver) {
+            requestAnimationFrame(update);
+        }
+    }
+
+    // Start the initial state
+    update();
+});
