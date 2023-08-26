@@ -9,7 +9,7 @@
 </head>
 <body>
     <canvas id="gameCanvas" width="360" height="640"></canvas>
-    <img id="logo" src="https://drive.google.com/file/d/1KDow4DahkQuh2KehntmPJJVkeOqQVhbO/view" alt="Your Logo" style="display: none;">
+    <img id="logo" src="https://lh5.googleusercontent.com/fQ7uvWb6A7yl_p9knJaqqJPaFtxsnYCbIZ9WNJxwVIRk4HLdBWYzW_FHp6hiMVQYf4D0PKvUtZuDGk8CKdkrelk=w16383" alt="Your Logo" style="display: none;">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var canvas = document.getElementById("gameCanvas");
