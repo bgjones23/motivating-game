@@ -1,251 +1,103 @@
-document.addEventListener('DOMContentLoaded', function() {
-    var canvas = document.getElementById("gameCanvas");
-    canvas.width = 360;
-    canvas.height = 640;
-    var ctx = canvas.getContext("2d");    
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Motivating Game</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="360" height="640"></canvas>
+    <img id="logo" src="https://drive.google.com/file/d/1KDow4DahkQuh2KehntmPJJVkeOqQVhbO/view" alt="Your Logo" style="display: none;">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var canvas = document.getElementById("gameCanvas");
+            canvas.width = 360;
+            canvas.height = 640;
+            var ctx = canvas.getContext("2d");
 
-    var player = {
-        x: canvas.width / 2,
-        y: canvas.height - 65,
-        size: 20,
-        speed: 5,
-        dx: 0,
-        dy: 0
-    };
+            var player = {
+                x: canvas.width / 2,
+                y: canvas.height - 65,
+                size: 20,
+                speed: 5,
+                dx: 0,
+                dy: 0
+            };
 
-    var points = 0;
-    var timer = 100;
-    var wave = 1;
-    var highScore = localStorage.getItem('highScore') || 0;
-    var obstacles = [];
-    var gameOver = false;
-    var gameStarted = false;
-    var timerInterval;
-    var waveInterval = 10; // Countdown timer for wave intervals (in seconds)
-    var difficultyIncreaseInterval = 30; // Countdown timer for difficulty increase (in seconds)
-    var maxWaves = 10; // Maximum number of waves
-    var speedIncreaseFactor = 1.1; // 10% faster
+            var points = 0;
+            var timer = 100;
+            var wave = 1;
+            var highScore = localStorage.getItem('highScore') || 0;
+            var obstacles = [];
+            var gameOver = false;
+            var gameStarted = false;
+            var timerInterval;
+            var waveInterval = 10; // Countdown timer for wave intervals (in seconds)
+            var difficultyIncreaseInterval = 30; // Countdown timer for difficulty increase (in seconds)
+            var maxWaves = 10; // Maximum number of waves
+            var speedIncreaseFactor = 1.1; // 10% faster
 
-    var motivationalMessages = [
-        "keep after it",
-        "you got this",
-        "don't stop now",
-        "you can do it",
-        "move faster",
-        "let's go"
-        "let's gooo",
-        "let's goooooo",
-        "almost!",
-        "so close!",
-        "keep going",
-        "nation!",
-        "sweet",
-        "motivate, or else",
-        "time to go",
-        "get it",
-        "snap!",
-        "sampsonite!",
-        "c'mon!",
-        "almoooooost!",
-        "in a world...",
-        "if not who but us?",
-        "if not now, then when?",
-        "are you not entertained?!?",
-        "seriously?",
-        "dude.",
-        "duuuuuuude.",
-        "dude",
-        "DUDE!",
-        "you do nice work.",
-        "noice",
-        "realllly noice",
-        "woah...",
-        "wooooooahh...",
-        "c'mon man!",
-        "are you motivated yet?",
-        "pineapple"
-                
-    ];
+            var motivationalMessages = [
+                "keep after it",
+                // ... motivational messages here ...
+                "pineapple"
+            ];
 
-    function displayCopyright() {
-        ctx.fillStyle = "black";
-        ctx.font = "10px Futura";
-        ctx.textAlign = "left";
-        ctx.fillText("©2023", 10, canvas.height - 10);
+            function displayCopyright() {
+                ctx.fillStyle = "black";
+                ctx.font = "10px Futura";
+                ctx.textAlign = "left";
+                ctx.fillText("©2023", 10, canvas.height - 10);
 
-        ctx.textAlign = "right";
-        ctx.fillText("Semper Ads...emotional advertising", canvas.width - 10, canvas.height - 10);
-    }
-
-    function startGame() {
-        gameStarted = true;
-        timerInterval = setInterval(function() {
-            if (timer > 0) {
-                timer--;
-                waveInterval--;
-                difficultyIncreaseInterval--;
-
-                if (timer % 10 === 0 && waveInterval <= 0) {
-                    wave++;
-                    waveInterval = 10; // Reset wave interval
-                }
-
-                if (wave <= maxWaves && difficultyIncreaseInterval <= 0) {
-                    speedIncreaseFactor += 0.1; // Increase difficulty
-                    difficultyIncreaseInterval = 30; // Reset difficulty interval
-                }
-            } else {
-                gameOver = true;
-                clearInterval(timerInterval);
-                resetGame();
+                ctx.textAlign = "right";
+                ctx.fillText("Semper Ads...emotional advertising", canvas.width - 10, canvas.height - 10);
             }
-        }, 1000);
-        update();
-    }
 
-    document.addEventListener("keydown", function(event) {
-        if (!gameStarted) {
-            startGame();
-        } else {
-            // Set the direction for immediate movement
-            if (event.key === "ArrowRight") player.dx = player.speed;
-            if (event.key === "ArrowLeft") player.dx = -player.speed;
-            if (event.key === "ArrowUp") player.dy = -player.speed;
-            if (event.key === "ArrowDown") player.dy = player.speed;
-        }
-    });
+            function startGame() {
+                // ... start game logic here ...
+            }
 
-    document.addEventListener("keyup", function(event) {
-        // Stop movement on key release
-        if (!gameOver && gameStarted) {
-            if (event.key === "ArrowRight" || event.key === "ArrowLeft") player.dx = 0;
-            if (event.key === "ArrowUp" || event.key === "ArrowDown") player.dy = 0;
-        }
-    });
+            // Keyboard controls for left and right movement
+            document.addEventListener("keydown", function(event) {
+                // ... keyboard controls logic here ...
+            });
 
-    function spawnObstacle() {
-        var size = 20;
-        var x = Math.random() * (canvas.width - size);
-        var y = 0;
-        var type = Math.random();
-        var color;
-        if (type < 0.9) color = "red";
-        else if (type < 0.98) color = "purple";
-        else color = "gold";
-        obstacles.push({x, y, size, color});
-    }
+            document.addEventListener("keyup", function(event) {
+                // ... keyboard controls logic here ...
+            });
 
-    function collisionDetected(rect1, rect2) {
-        return rect1.x < rect2.x + rect2.size &&
-               rect1.x + rect1.size > rect2.x &&
-               rect1.y < rect2.y + rect2.size &&
-               rect1.y + rect1.size > rect2.y;
-    }
+            function spawnObstacle() {
+                // ... spawn obstacle logic here ...
+            }
 
-    function updateHighScore() {
-        if (points > highScore) {
-            highScore = points;
-            localStorage.setItem('highScore', highScore);
-        }
-    }
+            function collisionDetected(rect1, rect2) {
+                // ... collision detection logic here ...
+            }
 
-    function resetGame() {
-        player.x = canvas.width / 2;
-        player.y = canvas.height - 65;
-        obstacles = [];
-        points = 0;
-        timer = 100;
-        wave = 1;
-        speedIncreaseFactor = 1.1;
-        gameOver = false;
-        gameStarted = false;
-        clearInterval(timerInterval);
-        update();
-    }
+            function updateHighScore() {
+                // ... update high score logic here ...
+            }
 
-    function update() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+            function resetGame() {
+                // ... reset game logic here ...
+            }
 
-        if (!gameStarted) {
-            ctx.fillStyle = "black";
-            ctx.font = "20px Futura";
-            ctx.textAlign = "center";
-            ctx.fillText("Tap somewhere to start", canvas.width / 2, canvas.height / 2);
-            ctx.fillText("Dodge red boxes", canvas.width / 2, canvas.height / 2 + 30);
-            return;
-        }
+            function update() {
+                // ... update game logic here ...
 
-        // Update player's position
-        player.x += player.dx * speedIncreaseFactor;
-        player.y += player.dy * speedIncreaseFactor;
+                // Draw player, obstacles, and other elements
 
-        // Keep player within bounds
-        if (player.x < 0) player.x = 0;
-        if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
-        if (player.y < 0) player.y = 0;
-        if (player.y + player.size > canvas.height) player.y = canvas.height - player.size;
-
-        // Draw player
-        ctx.fillStyle = "blue";
-        ctx.fillRect(player.x, player.y, player.size, player.size);
-
-        // Draw obstacles and check for collisions
-        for (var i = 0; i < obstacles.length; i++) {
-            var obs = obstacles[i];
-            obs.y += 5;
-            ctx.fillStyle = obs.color;
-            ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
-
-            // Collision check
-            if (collisionDetected(player, obs)) {
-                if (obs.color === "red") {
-                    gameOver = true;
-                    clearInterval(timerInterval);
-
-                    // Display a random motivational message
-                    var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
-                    ctx.fillStyle = "black";
-                    ctx.font = "40px Futura";
-                    ctx.textAlign = "center";
-                    ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
-
-                    updateHighScore(); // Update high score before resetting
-                    setTimeout(resetGame, 2000);
-                    return;
-
-                } else if (obs.color === "gold") {
-                    points += 10;
-                    obstacles.splice(i, 1);
-                    i--;
-
-                } else if (obs.color === "purple") {
-                    timer += 5;
-                    obstacles.splice(i, 1);
-                    i--;
+                // Request the next animation frame
+                if (!gameOver) {
+                    requestAnimationFrame(update);
                 }
             }
-        }
 
-        // Display points and timer
-        ctx.fillStyle = "black";
-        ctx.font = "18px Futura";
-        ctx.textAlign = "right";
-        ctx.fillText(`Points: ${points}`, canvas.width - 10, 25);
-        ctx.fillText(`Time: ${timer}s`, canvas.width - 10, 50);
-        ctx.fillText(`High Score: ${highScore}`, canvas.width - 10, 75); // Display high score
-        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, 100); // Display wave
-
-        // Spawn new obstacles
-        if (Math.random() < 0.05) spawnObstacle();
-
-        // Display copyright text
-        displayCopyright();
-
-        if (!gameOver) {
-            requestAnimationFrame(update);
-        }
-    }
-
-    // Start the game loop
-    update();
-});
+            // Start the game loop
+            update();
+        });
+    </script>
+</body>
+</html>
