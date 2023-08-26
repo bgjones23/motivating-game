@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var gameOver = false;
     var gameStarted = false;
 
-    var moveDirection = null;
+    var moveX = 0;
+    var moveY = 0;
 
     var timer = 100;
     var gameClock = 0;
@@ -45,28 +46,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         var touch = e.touches[0];
-        var touchX = touch.clientX;
-        var touchY = touch.clientY;
-
-        if (touchX < player.x) {
-            moveDirection = 'left';
-            player.dx = -1;
-        } else if (touchX > player.x + player.size) {
-            moveDirection = 'right';
-            player.dx = 1;
-        }
-
-        if (touchY < player.y) {
-            player.dy = -1;
-        } else if (touchY > player.y + player.size) {
-            player.dy = 1;
-        }
+        moveX = touch.clientX - player.x;
+        moveY = touch.clientY - player.y;
     });
 
     document.addEventListener('touchend', function(e) {
-        moveDirection = null;
-        player.dx = 0;
-        player.dy = 0;
+        moveX = 0;
+        moveY = 0;
     });
 
     function spawnObstacle() {
@@ -109,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.font = "20px Arial";
             ctx.textAlign = "center";
             ctx.fillText("Tap to start", canvas.width / 2, canvas.height / 2);
-            ctx.fillText("Tap left or right of blue square to move", canvas.width / 2, canvas.height / 2 + 30);
+            ctx.fillText("Touch anywhere to move the blue square", canvas.width / 2, canvas.height / 2 + 30);
             return;
         }
 
@@ -132,8 +118,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Move player
-        player.x += player.dx * player.speed;
-        player.y += player.dy * player.speed;
+        player.x += moveX * player.speed;
+        player.y += moveY * player.speed;
 
         // Keep player within canvas
         if (player.x < 0) player.x = 0;
