@@ -8,7 +8,6 @@
     <title>Motivating Game</title>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
     <canvas id="gameCanvas" width="360" height="640"></canvas>
     <img id="logo" src="https://drive.google.com/file/d/1KDow4DahkQuh2KehntmPJJVkeOqQVhbO/view" alt="Your Logo" style="display: none;">
     <script>
