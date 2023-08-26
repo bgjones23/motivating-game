@@ -75,24 +75,38 @@ document.addEventListener('DOMContentLoaded', function() {
         update();
     }
 
-    canvas.addEventListener('touchstart', function(event) {
-        if (!gameStarted) {
-            startGame();
-        } else {
-            // Start movement on touch
-            var touchX = event.touches[0].clientX;
-            if (touchX < player.x) player.dx = -player.speed;
-            else if (touchX > player.x + player.size) player.dx = player.speed;
-            else player.dx = 0;
-        }
-    });
+  var touchInterval = null;
 
-    canvas.addEventListener('touchend', function() {
-        // Stop movement on touch release
-        if (!gameOver && gameStarted) {
+canvas.addEventListener('touchstart', function(event) {
+    if (!gameStarted) {
+        startGame();
+    } else {
+        var touchX = event.touches[0].clientX;
+        if (touchX < player.x) {
+            player.dx = -player.speed;
+        } else if (touchX > player.x + player.size) {
+            player.dx = player.speed;
+        } else {
             player.dx = 0;
         }
-    });
+
+        // Start continuous movement
+        touchInterval = setInterval(function() {
+            player.x += player.dx;
+            player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+        }, 16); // Adjust the interval as needed (e.g., 16ms for 60 FPS)
+    }
+});
+
+canvas.addEventListener('touchend', function() {
+    // Stop continuous movement
+    clearInterval(touchInterval);
+    touchInterval = null;
+
+    // Stop the immediate movement
+    player.dx = 0;
+});
+
 
     function spawnObstacle() {
         var size = 20;
