@@ -6,24 +6,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var player = {
         x: canvas.width / 2,
-        y: canvas.height - 25,
         size: 20,
         speed: 5,
         dx: 0
     };
 
+    var points = 0;
+    var timer = 100;
+    var highScore = localStorage.getItem('highScore') || 0;
     var obstacles = [];
     var gameOver = false;
     var gameStarted = false;
-
-    var touchX = 0;
-    var touchY = 0;
-
-    var timer = 100;
-    var gameClock = 0;
-    var waveCountdown = 10;
-    var waveNumber = 1;
-    var obstacleSpeed = 2;
+    var timerInterval;
+    var internalGameClock = 0;
+    var wave = 1;
+    var waveIncreasingFactor = 1.1;
+    var nextWaveThreshold = 3;
 
     var motivationalMessages = [
         "Motivate",
@@ -41,49 +39,78 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('touchstart', function(e) {
         if (!gameStarted) {
             gameStarted = true;
-            update();
+            startGame();
         }
 
         var touch = e.touches[0];
-        touchX = touch.clientX;
-        touchY = touch.clientY;
+        if (touch.clientX < player.x) player.dx = -player.speed;
+        else player.dx = player.speed;
     });
 
-    document.addEventListener('touchend', function(e) {
-        touchX = 0;
-        touchY = 0;
+    document.addEventListener('touchend', function() {
+        player.dx = 0;
     });
 
     function spawnObstacle() {
         var size = 20;
         var x = Math.random() * (canvas.width - size);
-        var y = 0;
-        var type = Math.random();
-        var color;
-        if (type < 0.9) color = "red";
-        else if (type < 0.98) color = "purple";
-        else color = "gold";
-        obstacles.push({ x, y, size, color });
+        obstacles.push({ x, y: 0, size });
     }
 
     function collisionDetected(rect1, rect2) {
-        return rect1.x < rect2.x + rect2.size &&
+        return (
+            rect1.x < rect2.x + rect2.size &&
             rect1.x + rect1.size > rect2.x &&
             rect1.y < rect2.y + rect2.size &&
-            rect1.y + rect1.size > rect2.y;
+            rect1.y + rect1.size > rect2.y
+        );
+    }
+
+    function updateHighScore() {
+        if (points > highScore) {
+            highScore = points;
+            localStorage.setItem('highScore', highScore);
+        }
+    }
+
+    function startGame() {
+        timerInterval = setInterval(function() {
+            if (timer > 0) {
+                timer--;
+                internalGameClock++;
+
+                if (internalGameClock % 10 === 0) {
+                    if (internalGameClock / 10 === nextWaveThreshold) {
+                        nextWaveThreshold += 3;
+                        wave++;
+                        obstacles = [];
+                    }
+                }
+
+                if (internalGameClock % 10 === 0) {
+                    spawnObstacle();
+                }
+            } else {
+                gameOver = true;
+                clearInterval(timerInterval);
+                updateHighScore();
+                resetGame();
+            }
+        }, 1000);
+
+        update();
     }
 
     function resetGame() {
         player.x = canvas.width / 2;
-        player.y = canvas.height - 25;
         obstacles = [];
-        gameOver = false;
-        gameStarted = false;
+        points = 0;
         timer = 100;
-        gameClock = 0;
-        waveCountdown = 10;
-        waveNumber = 1;
-        obstacleSpeed = 2;
+        internalGameClock = 0;
+        wave = 1;
+        gameStarted = false;
+        clearInterval(timerInterval);
+        update();
     }
 
     function update() {
@@ -94,99 +121,58 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.font = "20px Arial";
             ctx.textAlign = "center";
             ctx.fillText("Tap to start", canvas.width / 2, canvas.height / 2);
-            ctx.fillText("Touch anywhere to move the blue square", canvas.width / 2, canvas.height / 2 + 30);
+            ctx.fillText("Tap left or right of blue square to move", canvas.width / 2, canvas.height / 2 + 30);
             return;
         }
 
-        // Update game clock and wave countdown
-        gameClock++;
-        if (gameClock % 60 === 0) { // Update every second
-            timer--;
-            if (timer <= 0) {
-                resetGame();
-                return;
-            }
-
-            waveCountdown--;
-            if (waveCountdown <= 0) {
-                waveNumber++;
-                waveCountdown = 10;
-                obstacleSpeed *= 1.1; // Increase obstacle speed by 10% every wave
-                obstacles = []; // Clear obstacles for new wave
-            }
-        }
-
-        // Move player
-        player.x += (touchX - player.x) * player.speed / canvas.width;
-        player.y += (touchY - player.y) * player.speed / canvas.height;
-
-        // Keep player within canvas
+        player.x += player.dx;
         if (player.x < 0) player.x = 0;
         if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
-        if (player.y < 0) player.y = 0;
-        if (player.y + player.size > canvas.height) player.y = canvas.height - player.size;
 
-        // Draw player
         ctx.fillStyle = "blue";
-        ctx.fillRect(player.x, player.y, player.size, player.size);
+        ctx.fillRect(player.x, canvas.height - 25, player.size, player.size);
 
-        // Draw obstacles and check for collisions
+        ctx.fillStyle = "red";
         for (var i = 0; i < obstacles.length; i++) {
             var obs = obstacles[i];
-            obs.y += obstacleSpeed;
-            ctx.fillStyle = obs.color;
+            obs.y += 5;
             ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
 
-            // Collision check
             if (collisionDetected(player, obs)) {
                 if (obs.color === "red") {
                     gameOver = true;
+                    clearInterval(timerInterval);
 
-                    // Display a random motivational message
-                    ctx.fillStyle = "black";
-                    ctx.font = "30px Arial";
-                    ctx.textAlign = "center";
                     var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+                    ctx.fillStyle = "black";
+                    ctx.font = "40px Arial";
+                    ctx.textAlign = "center";
                     ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
 
+                    updateHighScore();
                     setTimeout(resetGame, 2000);
                     return;
-
-                } else if (obs.color === "gold") {
-                    timer += 10;
-                    obstacles.splice(i, 1);
-                    i--;
-
-                } else if (obs.color === "purple") {
-                    timer += 5;
-                    obstacles.splice(i, 1);
-                    i--;
                 }
             }
 
-            // Remove obstacles that go off-screen
-            if (obs.y > canvas.height) {
+            if (obs.y + obs.size > canvas.height) {
                 obstacles.splice(i, 1);
                 i--;
             }
         }
 
-        // Display timer and wave information
         ctx.fillStyle = "black";
         ctx.font = "18px Arial";
         ctx.textAlign = "right";
-        ctx.fillText(`Time: ${timer}s`, canvas.width - 10, 25);
-        ctx.fillText(`Wave: ${waveNumber}`, canvas.width - 10, 50);
+        ctx.fillText(`Points: ${points}`, canvas.width - 10, 25);
+        ctx.fillText(`Time: ${timer}s`, canvas.width - 10, 50);
+        ctx.fillText(`High Score: ${highScore}`, canvas.width - 10, 75);
+        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, 100);
 
-        // Spawn new obstacles
-        if (Math.random() < 0.1 * waveNumber) spawnObstacle(); // Spawn more obstacles with increasing waves
-
-        // Request next animation frame
         if (!gameOver) {
             requestAnimationFrame(update);
         }
     }
 
-    // Start the initial state
     update();
 });
