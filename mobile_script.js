@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
     var canvas = document.getElementById("gameCanvas");
-    canvas.width = window.innerWidth - 10;
-    canvas.height = window.innerHeight - 20;
+
+    // Determine the smaller dimension for the canvas size
+    var canvasSize = Math.min(window.innerWidth - 10, window.innerHeight - 20);
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
     var ctx = canvas.getContext("2d");
 
     var player = { x: canvas.width / 2 - 10, y: canvas.height - 25, size: 20, dx: 5 };
