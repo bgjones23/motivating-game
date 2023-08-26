@@ -1,146 +1,133 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Motivating Game</title>
-</head>
-<body>
-    <canvas id="gameCanvas" width="360" height="640"></canvas>
-    <img id="logo" src="https://lh5.googleusercontent.com/fQ7uvWb6A7yl_p9knJaqqJPaFtxsnYCbIZ9WNJxwVIRk4HLdBWYzW_FHp6hiMVQYf4D0PKvUtZuDGk8CKdkrelk=w16383" alt="Your Logo" style="display: none;">
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var canvas = document.getElementById("gameCanvas");
-            canvas.width = 360;
-            canvas.height = 640;
-            var ctx = canvas.getContext("2d");
+function startGame() {
+    gameStarted = true;
+    gameOver = false;
+    timerInterval = setInterval(function() {
+        timer--;
+        if(timer <= 0) {
+            gameOver = true;
+            clearInterval(timerInterval);
+        }
+    }, 1000);
+}
 
-            var player = {
-                x: canvas.width / 2,
-                y: canvas.height - 65,
-                size: 20,
-                speed: 2, // Adjust the speed as needed
-                dx: 0,
-                dy: 0
-            };
+function spawnObstacle() {
+    var colorOptions = ['red', 'gold', 'purple'];
+    var color = colorOptions[Math.floor(Math.random() * colorOptions.length)];
+    var obstacle = {
+        x: Math.random() * (canvas.width - 20),
+        y: -20,
+        size: 20,
+        color: color,
+        speed: Math.random() * 2 + 3 + points * 0.05
+    };
+    obstacles.push(obstacle);
+}
 
-            var points = 0;
-            var timer = 100;
-            var wave = 1;
-            var highScore = localStorage.getItem('highScore') || 0;
-            var obstacles = [];
-            var gameOver = false;
-            var gameStarted = false;
-            var timerInterval;
-            var waveInterval = 10; // Countdown timer for wave intervals (in seconds)
-            var obstaclesIncreaseInterval = 30; // Countdown timer for obstacles increase (in seconds)
-            var maxWaves = 10; // Maximum number of waves
-            var obstaclesPerWave = 5; // Initial number of obstacles per wave
+function collisionDetected(rect1, rect2) {
+    return rect1.x < rect2.x + rect2.size &&
+           rect1.x + rect1.size > rect2.x &&
+           rect1.y < rect2.y + rect2.size &&
+           rect1.y + rect1.size > rect2.y;
+}
 
-            var motivationalMessages = [
-                "motivate",
-                "keep after it",
-                "you got this",
-                "don't stop now",
-                "believe",
-                "you can do it",
-                "move faster",
-                "let's go",
-                "let's gooo",
-                "let's goooooo",
-                "almost!",
-                "so close!",
-                "keep going",
-                "nation!",
-                "sweet",
-                "motivate, or else",
-                "time to go",
-                "get it",
-                "snap!",
-                "sampsonite!",
-                "c'mon!",
-                "almoooooost!",
-                "in a world...",
-                "if not who but us?",
-                "if not now, then when?",
-                "are you not entertained?!?",
-                "seriously?",
-                "dude.",
-                "duuuuuuude.",
-                "dude",
-                "DUDE!",
-                "you do nice work.",
-                "noice",
-                "realllly noice",
-                "woah...",
-                "wooooooahh...",
-                "c'mon man!",
-                "are you motivated yet?",
-                "pineapple"
-            ];
+function updateHighScore() {
+    if(points > highScore) {
+        highScore = points;
+        localStorage.setItem('highScore', highScore);
+    }
+}
 
-            function displayCopyright() {
-                ctx.fillStyle = "black";
-                ctx.font = "10px Futura";
-                ctx.textAlign = "left";
-                ctx.fillText("©2023", 10, canvas.height - 10);
+function resetGame() {
+    points = 0;
+    timer = 100;
+    obstacles = [];
+    gameOver = false;
+    gameStarted = false;
+    clearInterval(timerInterval);
+}
 
-                ctx.textAlign = "right";
-                ctx.fillText("created by Semper Ads--emotional advertising", canvas.width - 10, canvas.height - 10);
-            }
+function update() {
+    if(!gameOver) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Background gradient
+        let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#e66465');
+        gradient.addColorStop(1, '#9198e5');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Player Movement with Boundaries
+        player.x += player.dx;
+        if(player.x < 0) {
+            player.x = 0;
+        }
+        if(player.x + player.size > canvas.width) {
+            player.x = canvas.width - player.size;
+        }
+        
+        ctx.fillStyle = "#4CAF50";  // Player color
+        ctx.fillRect(player.x, player.y, player.size, player.size);
 
-            function startGame() {
-                // Start game logic here...
-            }
+        // Obstacle Movement and Collision
+        for(let i = 0; i < obstacles.length; i++) {
+            let obstacle = obstacles[i];
+            obstacle.y += obstacle.speed;
 
-            // Touch controls for left and right movement
-            canvas.addEventListener('touchstart', function(event) {
-                if (!gameStarted) {
-                    startGame();
-                } else {
-                    var touchX = event.touches[0].clientX;
-                    if (touchX < player.x) {
-                        player.dx = -player.speed;
-                    } else if (touchX > player.x + player.size) {
-                        player.dx = player.speed;
-                    } else {
-                        player.dx = 0;
-                    }
+            // Draw Obstacle with rounded edges
+            ctx.fillStyle = obstacle.color;
+            ctx.beginPath();
+            ctx.rect(obstacle.x, obstacle.y, obstacle.size, obstacle.size);
+            ctx.fill();
+            
+            // Check for collisions
+            if(collisionDetected(player, obstacle)) {
+                if(obstacle.color === 'red') {
+                    gameOver = true;
+                    clearInterval(timerInterval);
+                } else if(obstacle.color === 'gold') {
+                    points++;
+                    obstacles.splice(i, 1);
+                    i--;
+                } else if(obstacle.color === 'purple') {
+                    timer += 5;
+                    obstacles.splice(i, 1);
+                    i--;
                 }
-            });
-
-            canvas.addEventListener('touchend', function() {
-                // Stop movement on touch release
-                if (!gameOver && gameStarted) {
-                    player.dx = 0;
-                }
-            });
-
-            function spawnObstacle() {
-                // Spawn obstacle logic here...
             }
 
-            function collisionDetected(rect1, rect2) {
-                // Collision detection logic here...
+            // Remove obstacle if out of screen
+            if(obstacle.y > canvas.height) {
+                obstacles.splice(i, 1);
+                i--;
             }
+        }
 
-            function updateHighScore() {
-                // Update high score logic here...
-            }
+        // Handle obstacle spawning
+        if(Math.random() < 0.02 + points * 0.001) { // Increase spawn rate with points
+            spawnObstacle();
+        }
 
-            function resetGame() {
-                // Reset game logic here...
-            }
+        // Display Scores and Timer
+        ctx.fillStyle = "white";
+        ctx.font = "18px Futura";
+        ctx.textAlign = "right";
+        ctx.fillText(`Points: ${points}`, canvas.width - 10, 25);
+        ctx.fillText(`Time: ${timer}s`, canvas.width - 10, 50);
+        ctx.fillText(`High Score: ${highScore}`, canvas.width - 10, 75);
 
-            function update() {
-                // Update game logic here...
-            }
+        displayCopyright();
 
-            // Start the game loop
-            update();
-        });
-    </script>
-</body>
-</html>
+        requestAnimationFrame(update);
+    } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "white";
+        ctx.font = "24px Futura";
+        ctx.textAlign = "center";
+        ctx.fillText("Game Over!", canvas.width / 2, canvas.height / 2);
+        updateHighScore();
+    }
+}
+
+// Start the game loop
+update();
