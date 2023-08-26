@@ -3,43 +3,16 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas.width = 360;
     canvas.height = 640;
     var ctx = canvas.getContext("2d");
-    var touchStartX = 0;
-    var touchStartY = 0;
 
-    canvas.addEventListener('touchstart', function(event) {
-        if (!gameStarted) {
-            startGame();
-        } else {
-            // Store the initial touch position
-            touchStartX = event.touches[0].clientX;
-            touchStartY = event.touches[0].clientY;
-        }
-    });
+    var player = {
+        x: canvas.width / 2,
+        y: canvas.height - 65,
+        size: 20,
+        speed: 5,
+        dx: 0,
+        dy: 0
+    };
 
-    canvas.addEventListener('touchmove', function(event) {
-        // Calculate the change in touch position
-        var touchDeltaX = event.touches[0].clientX - touchStartX;
-        var touchDeltaY = event.touches[0].clientY - touchStartY;
-
-        // Update player's position based on touch movement
-        player.x += touchDeltaX * player.speed;
-        player.y += touchDeltaY * player.speed;
-
-        // Keep player within bounds
-        player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
-        player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
-
-        // Update touch start position for the next event
-        touchStartX = event.touches[0].clientX;
-        touchStartY = event.touches[0].clientY;
-    });
-
-    canvas.addEventListener('touchend', function() {
-        // Stop the movement on touch release
-        player.dx = 0;
-        player.dy = 0;
-    });
-});
     var points = 0;
     var timer = 100;
     var wave = 1;
@@ -60,25 +33,10 @@ document.addEventListener('DOMContentLoaded', function() {
         "Don't stop now",
         "Believe",
         "You can do it",
-        "Move faster",
+        "Move faster next time",
         "Let's go",
         "Let's gooo",
-        "Let's goooooo",
-        "Almost!",
-        "So close!",
-        "Keep going",
-        "Nation!",
-        "Sweet",
-        "Righteous",
-        "Hole Lee Clow!",
-        "Motivate, or else",
-        "Time to go",
-        "Get it",
-        "Snap!",
-        "Leroy Jenkins!",
-        "Sampsonite!",
-        "C'mon!",
-        "Almoooooost!"
+        "Let's goooooo"
     ];
 
     function displayCopyright() {
@@ -117,38 +75,24 @@ document.addEventListener('DOMContentLoaded', function() {
         update();
     }
 
-  var touchInterval = null;
-
-canvas.addEventListener('touchstart', function(event) {
-    if (!gameStarted) {
-        startGame();
-    } else {
-        var touchX = event.touches[0].clientX;
-        if (touchX < player.x) {
-            player.dx = -player.speed;
-        } else if (touchX > player.x + player.size) {
-            player.dx = player.speed;
+    canvas.addEventListener('touchstart', function(event) {
+        if (!gameStarted) {
+            startGame();
         } else {
+            // Start movement on touch
+            var touchX = event.touches[0].clientX;
+            if (touchX < player.x) player.dx = -player.speed;
+            else if (touchX > player.x + player.size) player.dx = player.speed;
+            else player.dx = 0;
+        }
+    });
+
+    canvas.addEventListener('touchend', function() {
+        // Stop movement on touch release
+        if (!gameOver && gameStarted) {
             player.dx = 0;
         }
-
-        // Start continuous movement
-        touchInterval = setInterval(function() {
-            player.x += player.dx;
-            player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
-        }, 8); // Adjust the interval as needed (e.g., 64ms for 60 FPS)
-    }
-});
-
-canvas.addEventListener('touchend', function() {
-    // Stop continuous movement
-    clearInterval(touchInterval);
-    touchInterval = null;
-
-    // Stop the immediate movement
-    player.dx = 0;
-});
-
+    });
 
     function spawnObstacle() {
         var size = 20;
