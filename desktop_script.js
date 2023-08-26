@@ -15,7 +15,7 @@
             var canvas = document.getElementById("gameCanvas");
             canvas.width = 360;
             canvas.height = 640;
-            var ctx = canvas.getContext("2d");    
+            var ctx = canvas.getContext("2d");
 
             var player = {
                 x: canvas.width / 2,
@@ -40,11 +40,23 @@
             var speedIncreaseFactor = 1.1; // 10% faster
 
             var motivationalMessages = [
-                // motivational messages here...
+                "keep after it",
+                "you got this",
+                "don't stop now",
+                "you can do it",
+                "move faster",
+                "let's go",
+                // Add more motivational messages here...
             ];
 
             function displayCopyright() {
-                // display copyright text here...
+                ctx.fillStyle = "black";
+                ctx.font = "10px Futura";
+                ctx.textAlign = "left";
+                ctx.fillText("©2023", 10, canvas.height - 10);
+
+                ctx.textAlign = "right";
+                ctx.fillText("created by Semper Ads--emotional advertising", canvas.width - 10, canvas.height - 10);
             }
 
             function startGame() {
