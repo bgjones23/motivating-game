@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (internalGameClock % 300 === 0) {
             wave++;
         }
-        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, canvas.height - 10);
+        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, 70);
 
         // Spawn new obstacles
         if (internalGameClock % 30 === 0) {
