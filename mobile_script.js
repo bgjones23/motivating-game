@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var player = { x: canvas.width / 2 - 10, y: canvas.height - 25, size: 20, dx: 5 };
     var obstacles = [];
-    var gameOver = false, gameStarted = false;
+    var gameOver = false, gameStarted = false, purpleActive = false;
     var touchStartPosition = null, touchMoveDirection = null;
 
     canvas.addEventListener('touchstart', function (event) {
@@ -27,7 +27,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function spawnObstacle() {
-        obstacles.push({ x: Math.random() * (canvas.width - 20), y: 0, size: 20 });
+        obstacles.push({ x: Math.random() * (canvas.width - 20), y: 0, size: 20, type: 'red' });
+    }
+
+    function spawnGoldenObstacle() {
+        obstacles.push({ x: Math.random() * (canvas.width - 20), y: 0, size: 20, type: 'golden' });
+    }
+
+    function spawnPurpleObstacle() {
+        obstacles.push({ x: Math.random() * (canvas.width - 20), y: 0, size: 20, type: 'purple' });
     }
 
     function collisionDetected(rect1, rect2) {
@@ -40,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
         obstacles = [];
         gameOver = false;
         gameStarted = false;
+        purpleActive = false;
         setTimeout(update, 500);
     }
 
@@ -64,30 +73,45 @@ document.addEventListener('DOMContentLoaded', function () {
         ctx.fillStyle = "red";
         for (var i = 0; i < obstacles.length; i++) {
             var obs = obstacles[i];
-            obs.y += 5;
+            obs.y += obs.type === 'purple' ? 2 : 5;
+            ctx.fillStyle = obs.type === 'red' ? 'red' : (obs.type === 'golden' ? 'gold' : 'purple');
             ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
+
             if (collisionDetected(player, obs)) {
-                gameOver = true;
-                ctx.fillStyle = "black";
-                ctx.font = "30px Arial";
-                ctx.textAlign = "center";
-                ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
-                setTimeout(resetGame, 2000);
-                return;
+                if (obs.type === 'red') {
+                    gameOver = true;
+                    ctx.fillStyle = "black";
+                    ctx.font = "30px Arial";
+                    ctx.textAlign = "center";
+                    ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+                    setTimeout(resetGame, 2000);
+                    return;
+                } else if (obs.type === 'golden') {
+                    obstacles.splice(i, 1);
+                    i--;
+                } else if (obs.type === 'purple') {
+                    purpleActive = true;
+                    obstacles.splice(i, 1);
+                    i--;
+                }
             }
         }
 
-        if (Math.random() < 0.1) spawnObstacle();
+        if (!purpleActive && Math.random() < 0.02) {
+            spawnPurpleObstacle();
+        } else if (Math.random() < 0.1) {
+            spawnObstacle();
+        } else if (Math.random() < 0.1) {
+            spawnGoldenObstacle();
+        }
 
         ctx.fillStyle = "black";
         ctx.font = "14px Arial";
         ctx.textAlign = "right";
         ctx.fillText(`Score: ${obstacles.length}`, canvas.width - 10, 20);
+        ctx.fillText(`Time: ${purpleActive ? "Active" : "Inactive"}`, canvas.width - 10, 40);
 
         if (!gameOver) {
             requestAnimationFrame(update);
         }
-    }
-
-    update();
-});
+   
