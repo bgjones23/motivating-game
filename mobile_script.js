@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var gameClock = 0;
     var waveCountdown = 10;
     var waveNumber = 1;
-    var obstacleSpeed = 5;
+    var obstacleSpeed = 2;
 
     var motivationalMessages = [
         "Motivate",
@@ -46,10 +46,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var touch = e.touches[0];
         moveDirection = touch.clientX < player.x ? 'left' : 'right';
+        var touchY = touch.clientY;
+        if (touchY > player.y + player.size) player.dy = player.speed;
+        if (touchY < player.y) player.dy = -player.speed;
     });
 
     document.addEventListener('touchend', function(e) {
         moveDirection = null;
+        player.dy = 0;
     });
 
     function spawnObstacle() {
@@ -81,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gameClock = 0;
         waveCountdown = 10;
         waveNumber = 1;
-        obstacleSpeed = 5;
+        obstacleSpeed = 2;
     }
 
     function update() {
@@ -109,12 +113,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Move player
-        if (moveDirection === 'left') player.x -= player.speed;
-        if (moveDirection === 'right') player.x += player.speed;
+        player.x += player.dx * player.speed;
+        player.y += player.dy * player.speed;
 
         // Keep player within canvas
         if (player.x < 0) player.x = 0;
         if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
+        if (player.y < 0) player.y = 0;
+        if (player.y + player.size > canvas.height) player.y = canvas.height - player.size;
 
         // Draw player
         ctx.fillStyle = "blue";
