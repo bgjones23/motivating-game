@@ -114,4 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!gameOver) {
             requestAnimationFrame(update);
         }
-   
+    }
+
+    update();
+});
