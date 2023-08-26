@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         var touch = e.touches[0];
-        moveDirection = touch.clientX < canvas.width / 2 ? 'left' : 'right';
+        moveDirection = touch.clientX < player.x ? 'left' : 'right';
     });
 
     document.addEventListener('touchend', function(e) {
