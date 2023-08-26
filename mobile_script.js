@@ -49,6 +49,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function handleTouchEnd() {
         moveDirection = null;
+        player.dx = 0;
+        player.dy = 0;
     }
 
     document.addEventListener('touchstart', handleTouchStart);
