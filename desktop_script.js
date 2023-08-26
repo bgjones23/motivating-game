@@ -64,7 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
         "woah...",
         "wooooooahh...",
         "c'mon man!",
-        "are you motivated yet?"
+        "are you motivated yet?",
+        "pineapple"
     ];
 
     function displayCopyright() {
