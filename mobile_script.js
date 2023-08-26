@@ -6,22 +6,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var player = {
         x: canvas.width / 2,
+        y: canvas.height - 25,
         size: 20,
-        speed: 5,
-        dx: 0
+        dx: 5
     };
 
-    var points = 0;
-    var timer = 100;
-    var highScore = localStorage.getItem('highScore') || 0;
     var obstacles = [];
     var gameOver = false;
     var gameStarted = false;
-    var timerInterval;
-    var internalGameClock = 0;
-    var wave = 1;
-    var waveIncreasingFactor = 1.1;
-    var nextWaveThreshold = 3;
 
     var motivationalMessages = [
         "Motivate",
@@ -36,89 +28,49 @@ document.addEventListener('DOMContentLoaded', function() {
         "Let's goooooo"
     ];
 
-  document.addEventListener('touchstart', function(e) {
-    if (!gameStarted) {
-        gameStarted = true;
-        startGame();
-    }
+    var timer = 100;
+    var internalGameClock = 0;
+    var wave = 1;
+    var speedIncreaseFactor = 1.1; // 10% faster
+    var moveDirection = null;
 
-    var touch = e.touches[0];
-    var touchX = touch.clientX;
-    var boxCenterX = player.x + player.size / 2;
-    var touchDistance = Math.abs(touchX - boxCenterX);
-    
-    if (touchX < boxCenterX) {
-        player.dx = -touchDistance / 20; // Adjust the divisor for desired sensitivity
-    } else {
-        player.dx = touchDistance / 20; // Adjust the divisor for desired sensitivity
-    }
-});
+    document.addEventListener('touchstart', function(e) {
+        if (!gameStarted) {
+            gameStarted = true;
+            update();
+        }
 
-document.addEventListener('touchend', function() {
-    player.dx = 0;
-});
+        var touch = e.touches[0];
+        moveDirection = touch.clientX < player.x ? 'left' : 'right';
+    });
 
+    document.addEventListener('touchend', function(e) {
+        moveDirection = null;
+    });
 
     function spawnObstacle() {
         var size = 20;
         var x = Math.random() * (canvas.width - size);
-        obstacles.push({ x, y: 0, size });
+        var y = 0;
+        obstacles.push({x, y, size, color: "red"});
     }
 
     function collisionDetected(rect1, rect2) {
-        return (
-            rect1.x < rect2.x + rect2.size &&
-            rect1.x + rect1.size > rect2.x &&
-            rect1.y < rect2.y + rect2.size &&
-            rect1.y + rect1.size > rect2.y
-        );
-    }
-
-    function updateHighScore() {
-        if (points > highScore) {
-            highScore = points;
-            localStorage.setItem('highScore', highScore);
-        }
-    }
-
-    function startGame() {
-        timerInterval = setInterval(function() {
-            if (timer > 0) {
-                timer--;
-                internalGameClock++;
-
-                if (internalGameClock % 10 === 0) {
-                    if (internalGameClock / 10 === nextWaveThreshold) {
-                        nextWaveThreshold += 3;
-                        wave++;
-                        obstacles = [];
-                    }
-                }
-
-                if (internalGameClock % 10 === 0) {
-                    spawnObstacle();
-                }
-            } else {
-                gameOver = true;
-                clearInterval(timerInterval);
-                updateHighScore();
-                resetGame();
-            }
-        }, 1000);
-
-        update();
+        return rect1.x < rect2.x + rect2.size &&
+               rect1.x + rect1.size > rect2.x &&
+               rect1.y < rect2.y + rect2.size &&
+               rect1.y + rect1.size > rect2.y;
     }
 
     function resetGame() {
         player.x = canvas.width / 2;
+        player.y = canvas.height - 25;
         obstacles = [];
-        points = 0;
+        gameOver = false;
+        gameStarted = false;
         timer = 100;
         internalGameClock = 0;
         wave = 1;
-        gameStarted = false;
-        clearInterval(timerInterval);
-        update();
     }
 
     function update() {
@@ -133,54 +85,76 @@ document.addEventListener('touchend', function() {
             return;
         }
 
-        player.x += player.dx;
+        internalGameClock++;
+
+        // Update player position based on touch input
+        if (moveDirection === 'left') player.x -= player.dx;
+        if (moveDirection === 'right') player.x += player.dx;
+
+        // Keep player within canvas
         if (player.x < 0) player.x = 0;
         if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
 
+        // Draw player
         ctx.fillStyle = "blue";
-        ctx.fillRect(player.x, canvas.height - 25, player.size, player.size);
+        ctx.fillRect(player.x, player.y, player.size, player.size);
 
-        ctx.fillStyle = "red";
+        // Draw obstacles and check for collisions
         for (var i = 0; i < obstacles.length; i++) {
             var obs = obstacles[i];
             obs.y += 5;
+            ctx.fillStyle = obs.color;
             ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
 
+            // Collision check
             if (collisionDetected(player, obs)) {
                 if (obs.color === "red") {
                     gameOver = true;
-                    clearInterval(timerInterval);
 
-                    var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+                    // Display a random motivational message
                     ctx.fillStyle = "black";
-                    ctx.font = "40px Arial";
+                    ctx.font = "30px Arial";
                     ctx.textAlign = "center";
+                    var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
                     ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
 
-                    updateHighScore();
+                    // Reset the game after 2 seconds
                     setTimeout(resetGame, 2000);
                     return;
                 }
             }
-
-            if (obs.y + obs.size > canvas.height) {
-                obstacles.splice(i, 1);
-                i--;
-            }
         }
 
+        // Display timer
         ctx.fillStyle = "black";
         ctx.font = "18px Arial";
         ctx.textAlign = "right";
-        ctx.fillText(`Points: ${points}`, canvas.width - 10, 25);
-        ctx.fillText(`Time: ${timer}s`, canvas.width - 10, 50);
-        ctx.fillText(`High Score: ${highScore}`, canvas.width - 10, 75);
-        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, 100);
+        ctx.fillText(`Time: ${timer}s`, canvas.width - 10, 25);
 
+        // Display copyright text
+        ctx.textAlign = "left";
+        ctx.fillText("Copyright 2023", 10, canvas.height - 10);
+        ctx.textAlign = "right";
+        ctx.fillText("Created by Semper Ads...Always Be Advertising!", canvas.width - 10, canvas.height - 10);
+
+        // Spawn new obstacles every 2 seconds
+        if (internalGameClock % 20 === 0) spawnObstacle();
+
+        // Increase difficulty every 10 seconds
+        if (internalGameClock % 100 === 0) {
+            timer -= 10;
+            if (internalGameClock % 300 === 0 && wave % 3 === 0) {
+                obstacles.push({ x: Math.random() * (canvas.width - 20), y: 0, size: 20, color: "purple" });
+            }
+            wave++;
+        }
+
+        // Request next animation frame
         if (!gameOver) {
             requestAnimationFrame(update);
         }
     }
 
+    // Start the initial state
     update();
 });
