@@ -33,10 +33,25 @@ document.addEventListener('DOMContentLoaded', function() {
         "Don't stop now",
         "Believe",
         "You can do it",
-        "Move faster next time",
+        "Move faster",
         "Let's go",
         "Let's gooo",
-        "Let's goooooo"
+        "Let's goooooo",
+        "Almost!",
+        "So close!",
+        "Keep going",
+        "Nation!",
+        "Sweet",
+        "Righteous",
+        "Hole Lee Clow!",
+        "Motivate, or else",
+        "Time to go",
+        "Get it",
+        "Snap!",
+        "Leroy Jenkins!",
+        "Sampsonite!",
+        "C'mon!",
+        "Almoooooost!"
     ];
 
     function displayCopyright() {
