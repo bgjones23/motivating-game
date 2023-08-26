@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
         "Let's goooooo"
     ];
 
-    var moveDirection = null;
+    var touchStartPosition = null;
+    var touchMoveDirection = null;
 
     document.addEventListener('touchstart', function(e) {
         if (!gameStarted) {
@@ -36,12 +37,23 @@ document.addEventListener('DOMContentLoaded', function() {
             update();
         }
 
-        var touch = e.touches[0];
-        moveDirection = touch.clientX < canvas.width / 2 ? 'left' : 'right';
+        touchStartPosition = e.touches[0].clientX;
     });
 
-    document.addEventListener('touchend', function(e) {
-        moveDirection = null;
+    document.addEventListener('touchmove', function(e) {
+        if (!touchStartPosition) return;
+        var touchX = e.touches[0].clientX;
+
+        if (touchX < touchStartPosition) {
+            touchMoveDirection = 'left';
+        } else if (touchX > touchStartPosition) {
+            touchMoveDirection = 'right';
+        }
+    });
+
+    document.addEventListener('touchend', function() {
+        touchStartPosition = null;
+        touchMoveDirection = null;
     });
 
     var timer = 100;
@@ -73,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
         timer = 100;
         internalGameClock = 0;
         wave = 1;
+        points = 0;
         setTimeout(update, 500); // Pause before restarting
     }
 
@@ -84,13 +97,13 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.font = "20px Arial";
             ctx.textAlign = "center";
             ctx.fillText("Tap to start", canvas.width / 2, canvas.height / 2);
-            ctx.fillText("Tap left or right of blue square to move", canvas.width / 2, canvas.height / 2 + 30);
+            ctx.fillText("Swipe left or right on the blue square to move", canvas.width / 2, canvas.height / 2 + 30);
             return;
         }
 
         // Move player
-        if (moveDirection === 'left') player.x -= player.dx;
-        if (moveDirection === 'right') player.x += player.dx;
+        if (touchMoveDirection === 'left') player.x -= player.dx;
+        if (touchMoveDirection === 'right') player.x += player.dx;
 
         // Keep player within canvas
         if (player.x < 0) player.x = 0;
@@ -104,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillStyle = "red";
         for (var i = 0; i < obstacles.length; i++) {
             var obs = obstacles[i];
-            obs.y += 5;
+            obs.y += 5 + wave; // Adjust wave speed
             ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
 
             // Check for collisions
@@ -144,9 +157,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Increase difficulty every 3 waves
-        if (wave % 3 === 0) {
-            var obstacleCount = Math.floor(obstacles.length * 1.1);
-            obstacles.length = obstacleCount;
+        if (internalGameClock % 300 === 0) {
+            wave++;
         }
 
         // Request next animation frame
