@@ -8,31 +8,22 @@ document.addEventListener('DOMContentLoaded', function() {
         x: canvas.width / 2,
         y: canvas.height - 25,
         size: 20,
-        dx: 5
+        speed: 2,
     };
 
     var obstacles = [];
     var gameOver = false;
     var gameStarted = false;
 
-    var motivationalMessages = [
-        "Motivate",
-        "Keep after it",
-        "You got this",
-        "Don't stop now",
-        "Believe",
-        "You can do it",
-        "Move faster next time",
-        "Let's go",
-        "Let's gooo",
-        "Let's goooooo"
-    ];
-
     var timer = 100;
     var internalGameClock = 0;
     var wave = 1;
     var speedIncreaseFactor = 1.1; // 10% faster
-    var moveDirection = null;
+
+    var moveDirection = {
+        left: false,
+        right: false,
+    };
 
     document.addEventListener('touchstart', function(e) {
         if (!gameStarted) {
@@ -41,11 +32,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         var touch = e.touches[0];
-        moveDirection = touch.clientX < player.x ? 'left' : 'right';
+        if (touch.clientX < player.x) {
+            moveDirection.left = true;
+        } else {
+            moveDirection.right = true;
+        }
     });
 
     document.addEventListener('touchend', function(e) {
-        moveDirection = null;
+        moveDirection.left = false;
+        moveDirection.right = false;
     });
 
     function spawnObstacle() {
@@ -88,8 +84,12 @@ document.addEventListener('DOMContentLoaded', function() {
         internalGameClock++;
 
         // Update player position based on touch input
-        if (moveDirection === 'left') player.x -= player.dx;
-        if (moveDirection === 'right') player.x += player.dx;
+        if (moveDirection.left) {
+            player.x -= player.speed;
+        }
+        if (moveDirection.right) {
+            player.x += player.speed;
+        }
 
         // Keep player within canvas
         if (player.x < 0) player.x = 0;
