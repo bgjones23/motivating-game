@@ -109,7 +109,7 @@ canvas.addEventListener('touchstart', function(event) {
         touchInterval = setInterval(function() {
             player.x += player.dx;
             player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
-        }, 16); // Adjust the interval as needed (e.g., 16ms for 60 FPS)
+        }, 16); // Adjust the interval as needed (e.g., 32ms for 60 FPS)
     }
 });
 
