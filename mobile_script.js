@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var player = {
         x: canvas.width / 2,
-        y: canvas.height - 25,
+        y: canvas.height - 45,
         size: 20,
         speed: 2,
     };
@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
         left: false,
         right: false,
     };
+
+    var points = 0;
+    var highScore = localStorage.getItem('highScore') || 0;
 
     document.addEventListener('touchstart', function(e) {
         if (!gameStarted) {
@@ -51,6 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
         obstacles.push({x, y, size, color: "red"});
     }
 
+    function spawnGoldBox() {
+        var size = 20;
+        var x = Math.random() * (canvas.width - size);
+        var y = 0;
+        obstacles.push({x, y, size, color: "gold"});
+    }
+
     function collisionDetected(rect1, rect2) {
         return rect1.x < rect2.x + rect2.size &&
                rect1.x + rect1.size > rect2.x &&
@@ -60,13 +70,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function resetGame() {
         player.x = canvas.width / 2;
-        player.y = canvas.height - 25;
+        player.y = canvas.height - 45;
         obstacles = [];
         gameOver = false;
         gameStarted = false;
         timer = 100;
         internalGameClock = 0;
         wave = 1;
+        points = 0;
     }
 
     function update() {
@@ -121,6 +132,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Reset the game after 2 seconds
                     setTimeout(resetGame, 2000);
                     return;
+                } else if (obs.color === "gold") {
+                    obstacles.splice(i, 1);
+                    i--;
+                    points += 10;
+                    if (points > highScore) {
+                        highScore = points;
+                        localStorage.setItem('highScore', highScore);
+                    }
                 }
             }
         }
@@ -131,22 +150,42 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.textAlign = "right";
         ctx.fillText(`Time: ${timer}s`, canvas.width - 10, 25);
 
-        // Display copyright text
+        // Display points and high score
         ctx.textAlign = "left";
-        ctx.fillText("Copyright 2023", 10, canvas.height - 10);
-        ctx.textAlign = "right";
-        ctx.fillText("Created by Semper Ads...Always Be Advertising!", canvas.width - 10, canvas.height - 10);
+        ctx.fillText(`Score: ${points}`, 10, 25);
+        ctx.fillText(`High Score: ${highScore}`, 10, 50);
 
-        // Spawn new obstacles every 2 seconds
-        if (internalGameClock % 20 === 0) spawnObstacle();
-
-        // Increase difficulty every 10 seconds
-        if (internalGameClock % 100 === 0) {
-            timer -= 10;
-            if (internalGameClock % 300 === 0 && wave % 3 === 0) {
-                obstacles.push({ x: Math.random() * (canvas.width - 20), y: 0, size: 20, color: "purple" });
-            }
+        // Display wave information
+        if (internalGameClock % 300 === 0) {
             wave++;
+        }
+        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, canvas.height - 10);
+
+        // Spawn new obstacles
+        if (internalGameClock % 30 === 0) {
+            spawnObstacle();
+        }
+        if (internalGameClock % 150 === 0) {
+            spawnGoldBox();
+        }
+
+        // Increase difficulty every 3 waves
+        if (internalGameClock % 300 === 0 && wave % 3 === 0) {
+            obstacles.push({ x: Math.random() * (canvas.width - 20), y: 0, size: 20, color: "purple" });
+        }
+
+        // Update timer
+        if (internalGameClock % 60 === 0) {
+            timer--;
+            if (timer <= 0) {
+                gameOver = true;
+                ctx.fillStyle = "black";
+                ctx.font = "30px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+                setTimeout(resetGame, 2000);
+                return;
+            }
         }
 
         // Request next animation frame
