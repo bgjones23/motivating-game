@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var gameOver = false;
     var gameStarted = false;
 
-    var moveX = 0;
-    var moveY = 0;
+    var touchX = 0;
+    var touchY = 0;
 
     var timer = 100;
     var gameClock = 0;
@@ -46,13 +46,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         var touch = e.touches[0];
-        moveX = touch.clientX - player.x;
-        moveY = touch.clientY - player.y;
+        touchX = touch.clientX;
+        touchY = touch.clientY;
     });
 
     document.addEventListener('touchend', function(e) {
-        moveX = 0;
-        moveY = 0;
+        touchX = 0;
+        touchY = 0;
     });
 
     function spawnObstacle() {
@@ -118,8 +118,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Move player
-        player.x += moveX * player.speed;
-        player.y += moveY * player.speed;
+        player.x += (touchX - player.x) * player.speed / canvas.width;
+        player.y += (touchY - player.y) * player.speed / canvas.height;
 
         // Keep player within canvas
         if (player.x < 0) player.x = 0;
