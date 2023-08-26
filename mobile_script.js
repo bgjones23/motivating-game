@@ -15,19 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var gameOver = false;
     var gameStarted = false;
 
-    var motivationalMessages = [
-        "Motivate",
-        "Keep after it",
-        "You got this",
-        "Don't stop now",
-        "Believe",
-        "You can do it",
-        "Move faster next time",
-        "Let's go",
-        "Let's gooo",
-        "Let's goooooo"
-    ];
-
     var touchStartPosition = null;
     var touchMoveDirection = null;
 
