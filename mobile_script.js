@@ -36,20 +36,28 @@ document.addEventListener('DOMContentLoaded', function() {
         "Let's goooooo"
     ];
 
-    document.addEventListener('touchstart', function(e) {
-        if (!gameStarted) {
-            gameStarted = true;
-            startGame();
-        }
+  document.addEventListener('touchstart', function(e) {
+    if (!gameStarted) {
+        gameStarted = true;
+        startGame();
+    }
 
-        var touch = e.touches[0];
-        if (touch.clientX < player.x) player.dx = -player.speed;
-        else player.dx = player.speed;
-    });
+    var touch = e.touches[0];
+    var touchX = touch.clientX;
+    var boxCenterX = player.x + player.size / 2;
+    var touchDistance = Math.abs(touchX - boxCenterX);
+    
+    if (touchX < boxCenterX) {
+        player.dx = -touchDistance / 20; // Adjust the divisor for desired sensitivity
+    } else {
+        player.dx = touchDistance / 20; // Adjust the divisor for desired sensitivity
+    }
+});
 
-    document.addEventListener('touchend', function() {
-        player.dx = 0;
-    });
+document.addEventListener('touchend', function() {
+    player.dx = 0;
+});
+
 
     function spawnObstacle() {
         var size = 20;
