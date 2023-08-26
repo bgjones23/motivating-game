@@ -8,9 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
         x: canvas.width / 2,
         y: canvas.height - 25,
         size: 20,
-        speed: 3, // Adjust the speed for smoother movement
-        dx: 0,
-        dy: 0
+        speed: 5,
+        dx: 0
     };
 
     var obstacles = [];
