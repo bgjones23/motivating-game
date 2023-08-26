@@ -40,13 +40,45 @@
             var speedIncreaseFactor = 1.1; // 10% faster
 
             var motivationalMessages = [
+              "motivate",
                 "keep after it",
                 "you got this",
                 "don't stop now",
+                "believe",
                 "you can do it",
                 "move faster",
                 "let's go",
-                // Add more motivational messages here...
+                "let's gooo",
+                "let's goooooo",
+                "almost!",
+                "so close!",
+                "keep going",
+                "nation!",
+                "sweet",
+                "motivate, or else",
+                "time to go",
+                "get it",
+                "snap!",
+                "sampsonite!",
+                "c'mon!",
+                "almoooooost!",
+                "in a world...",
+                "if not who but us?",
+                "if not now, then when?",
+                "are you not entertained?!?",
+                "seriously?",
+                "dude.",
+                "duuuuuuude.",
+                "dude",
+                "DUDE!",
+                "you do nice work.",
+                "noice",
+                "realllly noice",
+                "woah...",
+                "wooooooahh...",
+                "c'mon man!",
+                "are you motivated yet?",
+                "pineapple"
             ];
 
             function displayCopyright() {
