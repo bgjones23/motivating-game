@@ -5,28 +5,30 @@ document.addEventListener('DOMContentLoaded', function() {
     var ctx = canvas.getContext("2d");
 
     var player = {
-        x: canvas.width / 2,
-        y: canvas.height - 45,
+        x: 50,
+        y: canvas.height - 25,
         size: 20,
-        speed: 2,
+        dx: 5
     };
 
     var obstacles = [];
     var gameOver = false;
     var gameStarted = false;
 
-    var timer = 100;
-    var internalGameClock = 0;
-    var wave = 1;
-    var speedIncreaseFactor = 1.1; // 10% faster
+    var motivationalMessages = [
+        "Motivate",
+        "Keep after it",
+        "You got this",
+        "Don't stop now",
+        "Believe",
+        "You can do it",
+        "Move faster next time",
+        "Let's go",
+        "Let's gooo",
+        "Let's goooooo"
+    ];
 
-    var moveDirection = {
-        left: false,
-        right: false,
-    };
-
-    var points = 0;
-    var highScore = localStorage.getItem('highScore') || 0;
+    var moveDirection = null;
 
     document.addEventListener('touchstart', function(e) {
         if (!gameStarted) {
@@ -35,30 +37,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         var touch = e.touches[0];
-        if (touch.clientX < player.x) {
-            moveDirection.left = true;
-        } else {
-            moveDirection.right = true;
-        }
+        moveDirection = touch.clientX < canvas.width / 2 ? 'left' : 'right';
     });
 
     document.addEventListener('touchend', function(e) {
-        moveDirection.left = false;
-        moveDirection.right = false;
+        moveDirection = null;
     });
+
+    var timer = 100;
+    var internalGameClock = 0;
+    var wave = 1;
+    var points = 0;
+    var highScore = localStorage.getItem('highScore') || 0;
 
     function spawnObstacle() {
         var size = 20;
         var x = Math.random() * (canvas.width - size);
         var y = 0;
-        obstacles.push({x, y, size, color: "red"});
-    }
-
-    function spawnGoldBox() {
-        var size = 20;
-        var x = Math.random() * (canvas.width - size);
-        var y = 0;
-        obstacles.push({x, y, size, color: "gold"});
+        obstacles.push({x, y, size});
     }
 
     function collisionDetected(rect1, rect2) {
@@ -69,15 +65,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function resetGame() {
-        player.x = canvas.width / 2;
-        player.y = canvas.height - 45;
+        player.x = 50;
+        player.y = canvas.height - 25;
         obstacles = [];
         gameOver = false;
         gameStarted = false;
         timer = 100;
         internalGameClock = 0;
         wave = 1;
-        points = 0;
+        setTimeout(update, 500); // Pause before restarting
     }
 
     function update() {
@@ -92,15 +88,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        internalGameClock++;
-
-        // Update player position based on touch input
-        if (moveDirection.left) {
-            player.x -= player.speed;
-        }
-        if (moveDirection.right) {
-            player.x += player.speed;
-        }
+        // Move player
+        if (moveDirection === 'left') player.x -= player.dx;
+        if (moveDirection === 'right') player.x += player.dx;
 
         // Keep player within canvas
         if (player.x < 0) player.x = 0;
@@ -110,82 +100,53 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillStyle = "blue";
         ctx.fillRect(player.x, player.y, player.size, player.size);
 
-        // Draw obstacles and check for collisions
+        // Draw obstacles
+        ctx.fillStyle = "red";
         for (var i = 0; i < obstacles.length; i++) {
             var obs = obstacles[i];
             obs.y += 5;
-            ctx.fillStyle = obs.color;
             ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
 
-            // Collision check
+            // Check for collisions
             if (collisionDetected(player, obs)) {
-                if (obs.color === "red") {
-                    gameOver = true;
+                gameOver = true;
 
-                    // Display a random motivational message
-                    ctx.fillStyle = "black";
-                    ctx.font = "30px Arial";
-                    ctx.textAlign = "center";
-                    var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
-                    ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
+                // Display a random motivational message
+                ctx.fillStyle = "black";
+                ctx.font = "30px Arial";
+                ctx.textAlign = "center";
+                var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+                ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
 
-                    // Reset the game after 2 seconds
-                    setTimeout(resetGame, 2000);
-                    return;
-                } else if (obs.color === "gold") {
-                    obstacles.splice(i, 1);
-                    i--;
-                    points += 10;
-                    if (points > highScore) {
-                        highScore = points;
-                        localStorage.setItem('highScore', highScore);
-                    }
+                // Update high score
+                if (points > highScore) {
+                    highScore = points;
+                    localStorage.setItem('highScore', highScore);
                 }
+
+                // Reset the game after 2 seconds
+                setTimeout(resetGame, 2000);
+                return;
             }
         }
 
-        // Display timer
-        ctx.fillStyle = "black";
-        ctx.font = "18px Arial";
-        ctx.textAlign = "right";
-        ctx.fillText(`Time: ${timer}s`, canvas.width - 10, 25);
+        // Update internal game clock
+        internalGameClock++;
 
-        // Display points and high score
-        ctx.textAlign = "left";
-        ctx.fillText(`Score: ${points}`, 10, 25);
-        ctx.fillText(`High Score: ${highScore}`, 10, 50);
-
-        // Display wave information
-        if (internalGameClock % 300 === 0) {
-            wave++;
+        // Update timer every second
+        if (internalGameClock % 10 === 0 && timer > 0) {
+            timer--;
         }
-        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, 70);
 
         // Spawn new obstacles
         if (internalGameClock % 30 === 0) {
             spawnObstacle();
         }
-        if (internalGameClock % 150 === 0) {
-            spawnGoldBox();
-        }
 
         // Increase difficulty every 3 waves
-        if (internalGameClock % 300 === 0 && wave % 3 === 0) {
-            obstacles.push({ x: Math.random() * (canvas.width - 20), y: 0, size: 20, color: "purple" });
-        }
-
-        // Update timer
-        if (internalGameClock % 60 === 0) {
-            timer--;
-            if (timer <= 0) {
-                gameOver = true;
-                ctx.fillStyle = "black";
-                ctx.font = "30px Arial";
-                ctx.textAlign = "center";
-                ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
-                setTimeout(resetGame, 2000);
-                return;
-            }
+        if (wave % 3 === 0) {
+            var obstacleCount = Math.floor(obstacles.length * 1.1);
+            obstacles.length = obstacleCount;
         }
 
         // Request next animation frame
