@@ -3,16 +3,43 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas.width = 360;
     canvas.height = 640;
     var ctx = canvas.getContext("2d");
+    var touchStartX = 0;
+    var touchStartY = 0;
 
-    var player = {
-        x: canvas.width / 2,
-        y: canvas.height - 65,
-        size: 20,
-        speed: 5,
-        dx: 0,
-        dy: 0
-    };
+    canvas.addEventListener('touchstart', function(event) {
+        if (!gameStarted) {
+            startGame();
+        } else {
+            // Store the initial touch position
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
+        }
+    });
 
+    canvas.addEventListener('touchmove', function(event) {
+        // Calculate the change in touch position
+        var touchDeltaX = event.touches[0].clientX - touchStartX;
+        var touchDeltaY = event.touches[0].clientY - touchStartY;
+
+        // Update player's position based on touch movement
+        player.x += touchDeltaX * player.speed;
+        player.y += touchDeltaY * player.speed;
+
+        // Keep player within bounds
+        player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+        player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+
+        // Update touch start position for the next event
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+    });
+
+    canvas.addEventListener('touchend', function() {
+        // Stop the movement on touch release
+        player.dx = 0;
+        player.dy = 0;
+    });
+});
     var points = 0;
     var timer = 100;
     var wave = 1;
