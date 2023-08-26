@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
         x: canvas.width / 2,
         y: canvas.height - 25,
         size: 20,
-        speed: 5,
+        speed: 3, // Adjust the speed for smoother movement
         dx: 0,
         dy: 0
     };
