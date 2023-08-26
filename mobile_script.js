@@ -58,10 +58,10 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillStyle = "black";
         ctx.font = "10px Futura";
         ctx.textAlign = "left";
-        ctx.fillText("copyright 2023", 10, canvas.height - 10);
+        ctx.fillText("©2023", 10, canvas.height - 10);
 
         ctx.textAlign = "right";
-        ctx.fillText("created by Semper Ads...Always Be Advertising", canvas.width - 10, canvas.height - 10);
+        ctx.fillText("created by Semper Ads--emotional advertising", canvas.width - 10, canvas.height - 10);
     }
 
     function startGame() {
@@ -91,17 +91,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     canvas.addEventListener('touchstart', function(event) {
-        if (!gameStarted) {
-            startGame();
-        } else {
-            // Start movement on touch
-            var touchX = event.touches[0].clientX;
-            if (touchX < player.x) player.dx = -player.speed;
-            else if (touchX > player.x + player.size) player.dx = player.speed;
-            else player.dx = 0;
-        }
-    });
+                if (!gameStarted) {
+                    startGame();
+                } else {
+                    // Store the initial touch position
+                    touchStartX = event.touches[0].clientX;
+                    touchStartY = event.touches[0].clientY;
+                }
+            });
 
+            canvas.addEventListener('touchmove', function(event) {
+                // Calculate the change in touch position
+                var touchDeltaX = event.touches[0].clientX - touchStartX;
+                var touchDeltaY = event.touches[0].clientY - touchStartY;
+
+                // Update player's position based on touch movement
+                player.x += touchDeltaX * player.speed;
+                player.y += touchDeltaY * player.speed;
+
+                // Keep player within bounds
+                player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+                player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+
+                // Update touch start position for the next event
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
+            });
+
+            canvas.addEventListener('touchend', function() {
+                // Stop the movement on touch release
+                player.dx = 0;
+                player.dy = 0;
+            });
     canvas.addEventListener('touchend', function() {
         // Stop movement on touch release
         if (!gameOver && gameStarted) {
