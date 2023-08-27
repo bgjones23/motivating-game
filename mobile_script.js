@@ -247,23 +247,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
     update();
 });
-
-
-    function resetGame() {
-        if (messageTimeout) {
-            clearTimeout(messageTimeout);
-            messageTimeout = null;
-        }
-        if (points > highScore) {
-            highScore = points;
-            localStorage.setItem('highScore', highScore);
-        }
-        points = 0;
-        timer = 100;
-        obstacles = [];
-        gameStarted = false;
-        gameOver = false;
-    }
-
-    update();
-});
