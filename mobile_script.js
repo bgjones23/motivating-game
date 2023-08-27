@@ -20,8 +20,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var gameOver = false;
     var gameStarted = false;
     var timerInterval;
+    var messageTimeout;
 
-    var motivationalMessages = [ "keep after it",
+    var motivationalMessages = [
+        "keep after it",
         "you got this",
         "don't stop now",
         "believe",
@@ -58,9 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
         "wooooooahh...",
         "c'mon man!",
         "are you motivated yet?",
-        "you can do it",
-        "fiddlesticks",
-        "chicken wing",
         "pineapple"
     ];
 
@@ -70,13 +69,21 @@ document.addEventListener('DOMContentLoaded', function() {
             if (timer > 0) {
                 timer--;
             } else {
-                gameOver = true;
-                clearInterval(timerInterval);
-                resetGame();
+                endGame();
             }
         }, 1000);
         spawnObstacle();
         update();
+    }
+
+    function endGame() {
+        gameOver = true;
+        clearInterval(timerInterval);
+        ctx.fillStyle = "black";
+        ctx.font = "16px Futura";
+        ctx.textAlign = "center";
+        ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], canvas.width / 2, canvas.height / 2);
+        messageTimeout = setTimeout(resetGame, 3000);
     }
 
     function spawnObstacle() {
@@ -94,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
             x: Math.random() * canvas.width,
             y: 0,
             size: 20,
-            dy: 2,
+            dy: 3.4,  // Increased by 70%
             type: type,
         };
 
@@ -112,7 +119,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.addEventListener("touchmove", function(event) {
         var deltaX = event.touches[0].clientX - touchX;
-        player.dx = (deltaX > 0) ? player.speed : -player.speed;
+        if (deltaX > 5) { 
+            player.dx = player.speed;  // move right
+        } else if (deltaX < -5) {
+            player.dx = -player.speed;  // move left
+        } else {
+            player.dx = 0;  // don't move
+        }
     });
 
     document.addEventListener("touchend", function() {
@@ -122,83 +135,101 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function update() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         if (!gameStarted) {
             ctx.fillStyle = "black";
             ctx.font = "20px Futura";
             ctx.textAlign = "center";
             ctx.fillText("Touch to start", canvas.width / 2, canvas.height / 2);
             ctx.fillText("Slide left or right to move", canvas.width / 2, canvas.height / 2 + 30);
-            return;
+        } else if (!gameOver) {
+            movePlayer();
+            drawPlayer();
+            updateObstacles();
+            drawObstacles();
+            checkCollisions();
+            displayGameInfo();
         }
-        movePlayer();
-        drawPlayer();
-        updateObstacles();
-        drawObstacles();
-        checkCollisions();
-        displayGameInfo();
+
+        // Adding the copyright info
+        ctx.fillStyle = "black";
+        ctx.font = "10px Futura";
+        ctx.textAlign = "left";
+        ctx.fillText("©2023 Semper Ads", 10, canvas.height - 10);
+
+        ctx.textAlign = "right";
+        ctx.fillText("emotional advertising", canvas.width - 10, canvas.height - 10);
+
         requestAnimationFrame(update);
     }
 
     function movePlayer() {
         player.x += player.dx;
+
+        // Ensure player doesn't move out of the canvas
         if (player.x < 0) player.x = 0;
-        if (player.x > canvas.width) player.x = canvas.width;
+        if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
     }
 
     function drawPlayer() {
-        ctx.fillStyle = "blue";
-        ctx.fillRect(player.x - player.size / 2, player.y - player.size / 2, player.size, player.size);
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(player.x, player.y, player.size, player.size);
     }
 
     function updateObstacles() {
-        obstacles.forEach(obstacle => {
-            obstacle.y += obstacle.dy;
-        });
+        for (let i = 0; i < obstacles.length; i++) {
+            obstacles[i].y += obstacles[i].dy;
+            if (obstacles[i].y > canvas.height) {
+                obstacles.splice(i, 1);
+                i--;
+            }
+        }
     }
 
     function drawObstacles() {
-        obstacles.forEach(obstacle => {
-            ctx.fillStyle = (obstacle.type === 'gold') ? 'gold' : (obstacle.type === 'purple') ? 'purple' : 'red';
-            ctx.fillRect(obstacle.x - obstacle.size / 2, obstacle.y - obstacle.size / 2, obstacle.size, obstacle.size);
-        });
+        for (let obstacle of obstacles) {
+            if (obstacle.type === 'red') {
+                ctx.fillStyle = 'red';
+            } else if (obstacle.type === 'purple') {
+                ctx.fillStyle = 'purple';
+            } else if (obstacle.type === 'gold') {
+                ctx.fillStyle = 'gold';
+            }
+            ctx.fillRect(obstacle.x, obstacle.y, obstacle.size, obstacle.size);
+        }
     }
 
     function checkCollisions() {
-        obstacles.forEach((obstacle, index) => {
+        for (let obstacle of obstacles) {
             if (
                 player.x < obstacle.x + obstacle.size &&
                 player.x + player.size > obstacle.x &&
                 player.y < obstacle.y + obstacle.size &&
                 player.y + player.size > obstacle.y
             ) {
-                switch (obstacle.type) {
-                    case 'gold':
-                        points++;
-                        break;
-                    case 'purple':
-                        timer += 10;
-                        break;
-                    case 'red':
-                        gameOver = true;
-                        clearInterval(timerInterval);
-                        resetGame();
-                        return;
+                if (obstacle.type === 'red') {
+                    endGame();
+                } else if (obstacle.type === 'purple') {
+                    timer += 10;
+                } else if (obstacle.type === 'gold') {
+                    points++;
                 }
-                obstacles.splice(index, 1);
+                // Remove the obstacle once processed
+                const index = obstacles.indexOf(obstacle);
+                if (index > -1) {
+                    obstacles.splice(index, 1);
+                }
             }
-        });
+        }
     }
 
     function displayGameInfo() {
         ctx.fillStyle = "black";
-        ctx.font = "16px Futura";
+        ctx.font = "12px Futura";
         ctx.textAlign = "left";
-        ctx.fillText(`Points: ${points}`, 10, 20);
-        ctx.fillText(`Time: ${timer}s`, 10, 40);
-        ctx.fillText(`High Score: ${highScore}`, 10, 60);
-        if (gameOver) {
-            ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], 10, 100);
-        }
+        ctx.fillText("Points: " + points, 10, 20);
+        ctx.fillText("Timer: " + timer, 10, 40);
+        ctx.fillText("High Score: " + highScore, 10, 60);
     }
 
     function resetGame() {
@@ -210,6 +241,28 @@ document.addEventListener('DOMContentLoaded', function() {
         timer = 100;
         obstacles = [];
         gameStarted = false;
+        gameOver = false;
+        clearInterval(timerInterval);
+    }
+
+    update();
+});
+
+
+    function resetGame() {
+        if (messageTimeout) {
+            clearTimeout(messageTimeout);
+            messageTimeout = null;
+        }
+        if (points > highScore) {
+            highScore = points;
+            localStorage.setItem('highScore', highScore);
+        }
+        points = 0;
+        timer = 100;
+        obstacles = [];
+        gameStarted = false;
+        gameOver = false;
     }
 
     update();
