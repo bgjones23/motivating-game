@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var rand = Math.random();
         if (rand < 0.03) {
             type = 'gold';
-        } else if (rand < 0.08) {
+        } else if (rand < 0.05) {
             type = 'purple';
         } else {
             type = 'red';
@@ -101,12 +101,12 @@ document.addEventListener('DOMContentLoaded', function() {
             x: Math.random() * canvas.width,
             y: 0,
             size: 20,
-            dy: 3.4,  // Increased by 70%
+            dy: 4.5,  // Increased
             type: type,
         };
 
         obstacles.push(obstacle);
-        setTimeout(spawnObstacle, 1000);
+        setTimeout(spawnObstacle, 800);
     }
 
     document.addEventListener("touchstart", function(event) {
