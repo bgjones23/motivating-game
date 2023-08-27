@@ -71,10 +71,10 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillStyle = "black";
         ctx.font = "10px Futura";
         ctx.textAlign = "left";
-        ctx.fillText("copyright 2023", 10, canvas.height - 10);
+        ctx.fillText("©2023 Semper Ads", 10, canvas.height - 10);
 
         ctx.textAlign = "right";
-        ctx.fillText("created by Semper Ads...Always Be Advertising", canvas.width - 10, canvas.height - 10);
+        ctx.fillText("emotional advertising", canvas.width - 10, canvas.height - 10);
     }
 
     function startGame() {
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Display a random motivational message
                     var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
                     ctx.fillStyle = "black";
-                    ctx.font = "40px Futura";
+                    ctx.font = "24px Montserrat";
                     ctx.textAlign = "center";
                     ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
 
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Display points and timer
         ctx.fillStyle = "black";
-        ctx.font = "18px Futura";
+        ctx.font = "16px Montserrat";
         ctx.textAlign = "right";
         ctx.fillText(`Points: ${points}`, canvas.width - 10, 25);
         ctx.fillText(`Time: ${timer}s`, canvas.width - 10, 50);
