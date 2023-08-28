@@ -119,16 +119,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.addEventListener("touchmove", function(event) {
-        var deltaX = event.touches[0].clientX - touchX;
-        if (deltaX > 5) { 
-            player.dx = player.speed;  // move right
-        } else if (deltaX < -5) {
-            player.dx = -player.speed;  // move left
+    document.addEventListener("touchstart", function(event) {
+    if (!gameStarted) {
+        startGame();
         } else {
-            player.dx = 0;  // don't move
+            if (event.touches[0].clientX < player.x) {
+                player.dx = -player.speed;  // move left
+            } else {
+                player.dx = player.speed;  // move right
+            }
         }
     });
+
 
     document.addEventListener("touchend", function() {
         touchX = null;
