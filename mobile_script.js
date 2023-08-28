@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var gameStarted = false;
     var timerInterval;
     var messageTimeout;
+    var obstacleTimeout;
+
 
     var motivationalMessages = [
         "keep after it",
@@ -106,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         obstacles.push(obstacle);
-        setTimeout(spawnObstacle, 800);
+        obstacleTimeout = setTimeout(spawnObstacle, 800);
     }
 
     document.addEventListener("touchstart", function(event) {
@@ -243,6 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
         gameStarted = false;
         gameOver = false;
         clearInterval(timerInterval);
+        clearTimeout(obstacleTimeout);
     }
 
     update();
