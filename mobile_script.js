@@ -153,6 +153,14 @@ document.addEventListener('DOMContentLoaded', function() {
             drawObstacles();
             checkCollisions();
             displayGameInfo();
+        if (!gameOver) {
+            // Draw the motivational message
+            ctx.fillStyle = "black";
+            ctx.font = "16px Futura";
+            ctx.textAlign = "center";
+            ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], canvas.width / 2, canvas.height / 2);
+            }
+
         }
 
         // Adding the copyright info
