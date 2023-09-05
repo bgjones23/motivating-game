@@ -112,14 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.addEventListener("touchstart", function(event) {
-        if (!gameStarted) {
-            startGame();
-        } else {
-            touchX = event.touches[0].clientX;
-        }
-    });
-
-    document.addEventListener("touchstart", function(event) {
     if (!gameStarted) {
         startGame();
         } else {
@@ -153,15 +145,16 @@ document.addEventListener('DOMContentLoaded', function() {
             drawObstacles();
             checkCollisions();
             displayGameInfo();
-        if (!gameOver) {
-            // Draw the motivational message
-            ctx.fillStyle = "black";
-            ctx.font = "16px Futura";
-            ctx.textAlign = "center";
-            ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], canvas.width / 2, canvas.height / 2);
-            }
+       } 
+        
+        // Draw the motivational message
+        ctx.fillStyle = "black";
+        ctx.font = "16px Futura";
+        ctx.textAlign = "center";
+        ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], canvas.width / 2, canvas.height / 2);
+            
 
-        }
+        };
 
         // Adding the copyright info
         ctx.fillStyle = "black";
