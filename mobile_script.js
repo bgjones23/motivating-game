@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var messageTimeout;
     var obstacleTimeout;
 
-
     var motivationalMessages = [
         "keep after it",
         "you got this",
@@ -63,6 +62,8 @@ document.addEventListener('DOMContentLoaded', function() {
         "c'mon man!",
         "are you motivated yet?",
         "pineapple"
+
+
     ];
 
     function startGame() {
@@ -112,17 +113,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.addEventListener("touchstart", function(event) {
-    if (!gameStarted) {
-        startGame();
+        if (!gameStarted) {
+            startGame();
         } else {
             if (event.touches[0].clientX < player.x) {
                 player.dx = -player.speed;  // move left
             } else {
-                player.dx = player.speed;  // move right
+                player.dx = player.speed;   // move right
             }
         }
     });
-
 
     document.addEventListener("touchend", function() {
         touchX = null;
@@ -145,17 +145,14 @@ document.addEventListener('DOMContentLoaded', function() {
             drawObstacles();
             checkCollisions();
             displayGameInfo();
-       } 
-        
+        }
+
         // Draw the motivational message
         ctx.fillStyle = "black";
         ctx.font = "16px Futura";
         ctx.textAlign = "center";
         ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], canvas.width / 2, canvas.height / 2);
-            
-
-        };
-
+        
         // Adding the copyright info
         ctx.fillStyle = "black";
         ctx.font = "10px Futura";
