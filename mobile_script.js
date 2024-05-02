@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
         dx: 0,
     };
 
-    var touchX = null;
     var points = 0;
     var timer = 100;
     var highScore = parseInt(localStorage.getItem('highScore')) || 0;
@@ -24,46 +23,13 @@ document.addEventListener('DOMContentLoaded', function() {
     var obstacleTimeout;
 
     var motivationalMessages = [
-        "keep after it",
-        "you got this",
-        "don't stop now",
-        "believe",
-        "you can do it",
-        "move faster",
-        "let's go",
-        "let's gooo",
-        "let's goooooo",
-        "almost!",
-        "so close!",
-        "keep going",
-        "nation!",
-        "sweet",
-        "motivate, or else",
-        "time to go",
-        "get it",
-        "snap!",
-        "sampsonite!",
-        "c'mon!",
-        "almoooooost!",
-        "in a world...",
-        "if not who but us?",
-        "if not now, then when?",
-        "are you not entertained?!?",
-        "seriously?",
-        "dude.",
-        "duuuuuuude.",
-        "dude",
-        "DUDE!",
-        "you do nice work.",
-        "noice",
-        "realllly noice",
-        "woah...",
-        "wooooooahh...",
-        "c'mon man!",
-        "are you motivated yet?",
-        "pineapple"
-
-
+        "keep after it", "you got this", "don't stop now", "believe", "you can do it", 
+        "move faster", "let's go", "almost!", "so close!", "keep going", "nation!", 
+        "sweet", "motivate, or else", "time to go", "get it", "snap!", "sampsonite!",
+        "c'mon!", "almoooooost!", "in a world...", "if not who but us?", 
+        "if not now, then when?", "are you not entertained?!?", "seriously?", "dude.",
+        "duuuuuuude.", "DUDE!", "you do nice work.", "noice", "realllly noice", 
+        "woah...", "c'mon man!", "are you motivated yet?", "pineapple"
     ];
 
     function startGame() {
@@ -82,56 +48,33 @@ document.addEventListener('DOMContentLoaded', function() {
     function endGame() {
         gameOver = true;
         clearInterval(timerInterval);
-        ctx.fillStyle = "black";
-        ctx.font = "16px Futura";
-        ctx.textAlign = "center";
-        ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], canvas.width / 2, canvas.height / 2);
+        showMessage();
         messageTimeout = setTimeout(resetGame, 3000);
     }
 
     function spawnObstacle() {
-        var type;
         var rand = Math.random();
-        if (rand < 0.03) {
-            type = 'gold';
-        } else if (rand < 0.05) {
-            type = 'purple';
-        } else {
-            type = 'red';
-        }
-
+        var type = rand < 0.03 ? 'gold' : rand < 0.05 ? 'purple' : 'red';
         var obstacle = {
             x: Math.random() * canvas.width,
             y: 0,
             size: 20,
-            dy: 4.5,  // Increased
-            type: type,
+            dy: 4.5,
+            type: type
         };
-
         obstacles.push(obstacle);
-        obstacleTimeout = setTimeout(spawnObstacle, 800);
+        obstacleTimeout = setTimeout(spawnObstacle, 1000);
     }
 
-    document.addEventListener("touchstart", function(event) {
-        if (!gameStarted) {
-            startGame();
-        } else {
-            if (event.touches[0].clientX < player.x) {
-                player.dx = -player.speed;  // move left
-            } else {
-                player.dx = player.speed;   // move right
-            }
-        }
-    });
-
-    document.addEventListener("touchend", function() {
-        touchX = null;
-        player.dx = 0;
-    });
+    function showMessage() {
+        ctx.fillStyle = "black";
+        ctx.font = "16px Futura";
+        ctx.textAlign = "center";
+        ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], canvas.width / 2, canvas.height / 2);
+    }
 
     function update() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
         if (!gameStarted) {
             ctx.fillStyle = "black";
             ctx.font = "20px Futura";
@@ -146,29 +89,11 @@ document.addEventListener('DOMContentLoaded', function() {
             checkCollisions();
             displayGameInfo();
         }
-
-        // Draw the motivational message
-        ctx.fillStyle = "black";
-        ctx.font = "16px Futura";
-        ctx.textAlign = "center";
-        ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], canvas.width / 2, canvas.height / 2);
-        
-        // Adding the copyright info
-        ctx.fillStyle = "black";
-        ctx.font = "10px Futura";
-        ctx.textAlign = "left";
-        ctx.fillText("©2023 Semper Ads", 10, canvas.height - 10);
-
-        ctx.textAlign = "right";
-        ctx.fillText("emotional advertising", canvas.width - 10, canvas.height - 10);
-
         requestAnimationFrame(update);
     }
 
     function movePlayer() {
         player.x += player.dx;
-
-        // Ensure player doesn't move out of the canvas
         if (player.x < 0) player.x = 0;
         if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
     }
@@ -189,26 +114,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function drawObstacles() {
-        for (let obstacle of obstacles) {
-            if (obstacle.type === 'red') {
-                ctx.fillStyle = 'red';
-            } else if (obstacle.type === 'purple') {
-                ctx.fillStyle = 'purple';
-            } else if (obstacle.type === 'gold') {
-                ctx.fillStyle = 'gold';
-            }
+        obstacles.forEach(obstacle => {
+            ctx.fillStyle = obstacle.type === 'red' ? 'red' : obstacle.type === 'purple' ? 'purple' : 'gold';
             ctx.fillRect(obstacle.x, obstacle.y, obstacle.size, obstacle.size);
-        }
+        });
     }
 
     function checkCollisions() {
-        for (let obstacle of obstacles) {
-            if (
-                player.x < obstacle.x + obstacle.size &&
+        obstacles.forEach((obstacle, index) => {
+            if (player.x < obstacle.x + obstacle.size &&
                 player.x + player.size > obstacle.x &&
                 player.y < obstacle.y + obstacle.size &&
-                player.y + player.size > obstacle.y
-            ) {
+                player.y + player.size > obstacle.y) {
                 if (obstacle.type === 'red') {
                     endGame();
                 } else if (obstacle.type === 'purple') {
@@ -216,13 +133,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (obstacle.type === 'gold') {
                     points++;
                 }
-                // Remove the obstacle once processed
-                const index = obstacles.indexOf(obstacle);
-                if (index > -1) {
-                    obstacles.splice(index, 1);
-                }
+                obstacles.splice(index, 1);
             }
-        }
+        });
     }
 
     function displayGameInfo() {
@@ -235,10 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function resetGame() {
-        if (points > highScore) {
-            highScore = points;
-            localStorage.setItem('highScore', highScore);
-        }
         points = 0;
         timer = 100;
         obstacles = [];
