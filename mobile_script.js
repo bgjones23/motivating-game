@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     var canvas = document.getElementById("gameCanvas");
-    canvas.width = 360;
-    canvas.height = 640;
     var ctx = canvas.getContext("2d");
+    
+    // Adjust canvas size for mobile
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     var player = {
         x: canvas.width / 2,
@@ -11,6 +13,14 @@ document.addEventListener('DOMContentLoaded', function() {
         speed: 5,
         dx: 0,
     };
+
+    // Update canvas size on window resize
+    window.addEventListener('resize', function() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        player.x = canvas.width / 2;
+        player.y = canvas.height - 65;
+    });
 
     var points = 0;
     var timer = 100;
@@ -92,6 +102,24 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(update);
     }
 
+    // Touch event handling
+    canvas.addEventListener('touchstart', function(event) {
+        if (!gameStarted) {
+            startGame();
+        } else {
+            var touchX = event.touches[0].clientX;
+            if (touchX < canvas.width / 2) {
+                player.dx = -player.speed; // Move left
+            } else {
+                player.dx = player.speed; // Move right
+            }
+        }
+    });
+
+    canvas.addEventListener('touchend', function(event) {
+        player.dx = 0; // Stop moving
+    });
+
     function movePlayer() {
         player.x += player.dx;
         if (player.x < 0) player.x = 0;
@@ -156,6 +184,4 @@ document.addEventListener('DOMContentLoaded', function() {
         clearInterval(timerInterval);
         clearTimeout(obstacleTimeout);
     }
-
-    update();
 });
