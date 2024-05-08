@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         player.x = canvas.width / 2;
-        player.y = canvas.height - 65;
+        player.y = canvas.height / 2; // Center player vertically as well
         // Redraw the game to reflect new sizes
         if (gameStarted && !gameOver) {
             update();
@@ -18,10 +18,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var player = {
         x: canvas.width / 2,
-        y: canvas.height - 65,
+        y: canvas.height / 2,
         size: 20,
         speed: 5,
         dx: 0,
+        dy: 0
     };
 
     // Update canvas size on window resize
@@ -69,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function spawnObstacle() {
         var rand = Math.random();
-        var type = rand < 0.03 ? 'gold' : rand < 0.05 ? 'purple' : 'red';
+        var type = rand < 0.15 ? 'red' : rand < 0.20 ? 'purple' : 'gold'; // Increased 'red' frequency
         var obstacle = {
             x: Math.random() * canvas.width,
             y: 0,
@@ -78,14 +79,16 @@ document.addEventListener('DOMContentLoaded', function() {
             type: type
         };
         obstacles.push(obstacle);
-        obstacleTimeout = setTimeout(spawnObstacle, 1000);
+        obstacleTimeout = setTimeout(spawnObstacle, 800); // Decreased time for more frequent spawning
     }
 
     function showMessage() {
-        ctx.fillStyle = "black";
-        ctx.font = "16px Futura";
-        ctx.textAlign = "center";
-        ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], canvas.width / 2, canvas.height / 2);
+        if (!gameOver) { // Only show message if game is not over
+            ctx.fillStyle = "black";
+            ctx.font = "16px Futura";
+            ctx.textAlign = "center";
+            ctx.fillText(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)], canvas.width / 2, canvas.height / 2);
+        }
     }
 
     function update() {
@@ -95,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.font = "20px Futura";
             ctx.textAlign = "center";
             ctx.fillText("Touch to start", canvas.width / 2, canvas.height / 2);
-            ctx.fillText("Slide left or right to move", canvas.width / 2, canvas.height / 2 + 30);
+            ctx.fillText("Swipe to move", canvas.width / 2, canvas.height / 2 + 30);
         } else if (!gameOver) {
             movePlayer();
             drawPlayer();
@@ -107,28 +110,32 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(update);
     }
 
-    // Touch event handling
+    // Touch event handling for both axes
     canvas.addEventListener('touchstart', function(event) {
         if (!gameStarted) {
             startGame();
         } else {
             var touchX = event.touches[0].clientX;
-            if (touchX < canvas.width / 2) {
-                player.dx = -player.speed; // Move left
-            } else {
-                player.dx = player.speed; // Move right
-            }
+            var touchY = event.touches[0].clientY;
+            player.dx = (touchX < canvas.width / 2) ? -player.speed : player.speed;
+            player.dy = (touchY < canvas.height / 2) ? -player.speed : player.speed;
         }
     });
 
     canvas.addEventListener('touchend', function(event) {
-        player.dx = 0; // Stop moving
+        player.dx = 0; // Stop moving horizontally
+        player.dy = 0; // Stop moving vertically
     });
 
     function movePlayer() {
         player.x += player.dx;
+        player.y += player.dy;
+        // Boundaries check for horizontal movement
         if (player.x < 0) player.x = 0;
         if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
+        // Boundaries check for vertical movement
+        if (player.y < 0) player.y = 0;
+        if (player.y + player.size > canvas.height) player.y = canvas.height - player.size;
     }
 
     function drawPlayer() {
@@ -186,6 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
         obstacles = [];
         gameStarted = false;
         gameOver = false;
+        player.speed = 5; // Reset speed to initial value
         clearInterval(timerInterval);
         clearTimeout(obstacleTimeout);
     }
