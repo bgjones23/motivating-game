@@ -2,9 +2,19 @@ document.addEventListener('DOMContentLoaded', function() {
     var canvas = document.getElementById("gameCanvas");
     var ctx = canvas.getContext("2d");
     
+    function adjustCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        player.x = canvas.width / 2;
+        player.y = canvas.height - 65;
+        // Redraw the game to reflect new sizes
+        if (gameStarted && !gameOver) {
+            update();
+        }
+    }
+
     // Adjust canvas size for mobile
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    adjustCanvas();
 
     var player = {
         x: canvas.width / 2,
@@ -15,12 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Update canvas size on window resize
-    window.addEventListener('resize', function() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        player.x = canvas.width / 2;
-        player.y = canvas.height - 65;
-    });
+    window.addEventListener('resize', adjustCanvas);
 
     var points = 0;
     var timer = 100;
