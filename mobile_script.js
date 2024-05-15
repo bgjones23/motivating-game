@@ -86,8 +86,12 @@ document.addEventListener('DOMContentLoaded', function() {
             var touchX = touch.clientX - rect.left;
             var touchY = touch.clientY - rect.top;
 
-            player.dx = (touchX - player.x) * 0.1;
-            player.dy = (touchY - player.y) * 0.1;
+            // Move player based on touch position but keep it visible
+            var deltaX = touchX - player.x;
+            var deltaY = touchY - player.y;
+
+            player.dx = deltaX * 0.1;
+            player.dy = deltaY * 0.1;
         }
     });
 
