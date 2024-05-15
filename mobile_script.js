@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var canvas = document.getElementById("gameCanvas");
     canvas.width = 360;
     canvas.height = 640;
-    var ctx = canvas.getContext("2d");    
+    var ctx = canvas.getContext("2d");
 
     var player = {
         x: canvas.width / 2,
@@ -27,14 +27,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var speedIncreaseFactor = 1.1; // 10% faster
 
     var motivationalMessages = [
-        "keep after it", "you got this", "don't stop now", "believe", "you can do it", 
-        "move faster", "let's go", "let's gooo", "let's goooooo", "almost!", "so close!", 
-        "keep going", "nation!", "sweet", "motivate, or else", "time to go", "get it", 
-        "snap!", "sampsonite!", "c'mon!", "almoooooost!", "in a world...", "if not who but us?", 
-        "if not now, then when?", "are you not entertained?!?", "seriously?", "dude.", "duuuuuuude.", 
-        "dude", "DUDE!", "you do nice work.", "noice", "realllly noice", "woah...", "wooooooahh...", 
+        "keep after it", "you got this", "don't stop now", "believe", "you can do it",
+        "move faster", "let's go", "let's gooo", "let's goooooo", "almost!", "so close!",
+        "keep going", "nation!", "sweet", "motivate, or else", "time to go", "get it",
+        "snap!", "sampsonite!", "c'mon!", "almoooooost!", "in a world...", "if not who but us?",
+        "if not now, then when?", "are you not entertained?!?", "seriously?", "dude.", "duuuuuuude.",
+        "dude", "DUDE!", "you do nice work.", "noice", "realllly noice", "woah...", "wooooooahh...",
         "c'mon man!", "are you motivated yet?", "pineapple"
     ];
+
+    var touchStartX = null;
+    var touchStartY = null;
 
     function displayCopyright() {
         ctx.fillStyle = "black";
@@ -76,28 +79,37 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas.addEventListener("touchstart", function(event) {
         if (!gameStarted) {
             startGame();
+        } else {
+            var touch = event.touches[0];
+            var rect = canvas.getBoundingClientRect();
+            touchStartX = touch.clientX - rect.left;
+            touchStartY = touch.clientY - rect.top;
         }
     });
 
     canvas.addEventListener("touchmove", function(event) {
-        if (gameStarted && !gameOver) {
+        if (gameStarted && !gameOver && touchStartX !== null && touchStartY !== null) {
             var touch = event.touches[0];
             var rect = canvas.getBoundingClientRect();
             var touchX = touch.clientX - rect.left;
             var touchY = touch.clientY - rect.top;
 
-            // Move player based on touch position but keep it visible
-            var deltaX = touchX - player.x;
-            var deltaY = touchY - player.y;
+            var deltaX = touchX - touchStartX;
+            var deltaY = touchY - touchStartY;
 
             player.dx = deltaX * 0.1;
             player.dy = deltaY * 0.1;
+
+            touchStartX = touchX;
+            touchStartY = touchY;
         }
     });
 
     canvas.addEventListener("touchend", function() {
         player.dx = 0;
         player.dy = 0;
+        touchStartX = null;
+        touchStartY = null;
     });
 
     function spawnObstacle() {
@@ -109,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (type < 0.9) color = "red";
         else if (type < 0.98) color = "purple";
         else color = "gold";
-        obstacles.push({x, y, size, color});
+        obstacles.push({ x, y, size, color });
     }
 
     function collisionDetected(rect1, rect2) {
