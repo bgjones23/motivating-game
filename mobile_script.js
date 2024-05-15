@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var canvas = document.getElementById("gameCanvas");
     canvas.width = 360;
     canvas.height = 640;
-    var ctx = canvas.getContext("2d");    
+    var ctx = canvas.getContext("2d");
 
     var player = {
         x: canvas.width / 2,
@@ -21,20 +21,30 @@ document.addEventListener('DOMContentLoaded', function() {
     var gameOver = false;
     var gameStarted = false;
     var timerInterval;
-    var waveInterval = 10; // Countdown timer for wave intervals (in seconds)
-    var difficultyIncreaseInterval = 30; // Countdown timer for difficulty increase (in seconds)
-    var maxWaves = 10; // Maximum number of waves
-    var speedIncreaseFactor = 1.1; // 10% faster
+    var waveInterval = 10;
+    var difficultyIncreaseInterval = 30;
+    var maxWaves = 10;
+    var speedIncreaseFactor = 1.1;
 
     var motivationalMessages = [
-        "keep after it", "you got this", "don't stop now", "believe", "you can do it", 
-        "move faster", "let's go", "let's gooo", "let's goooooo", "almost!", "so close!", 
-        "keep going", "nation!", "sweet", "motivate, or else", "time to go", "get it", 
-        "snap!", "sampsonite!", "c'mon!", "almoooooost!", "in a world...", "if not who but us?", 
-        "if not now, then when?", "are you not entertained?!?", "seriously?", "dude.", "duuuuuuude.", 
-        "dude", "DUDE!", "you do nice work.", "noice", "realllly noice", "woah...", "wooooooahh...", 
+        "keep after it", "you got this", "don't stop now", "believe", "you can do it",
+        "move faster", "let's go", "let's gooo", "let's goooooo", "almost!", "so close!",
+        "keep going", "nation!", "sweet", "motivate, or else", "time to go", "get it",
+        "snap!", "sampsonite!", "c'mon!", "almoooooost!", "in a world...", "if not who but us?",
+        "if not now, then when?", "are you not entertained?!?", "seriously?", "dude.", "duuuuuuude.",
+        "dude", "DUDE!", "you do nice work.", "noice", "realllly noice", "woah...", "wooooooahh...",
         "c'mon man!", "are you motivated yet?", "pineapple"
     ];
+
+    var joystick = {
+        x: canvas.width / 2,
+        y: canvas.height - 60,
+        outerRadius: 40,
+        innerRadius: 20,
+        touchId: null,
+        touchStartX: null,
+        touchStartY: null
+    };
 
     function displayCopyright() {
         ctx.fillStyle = "black";
@@ -56,12 +66,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (timer % 10 === 0 && waveInterval <= 0) {
                     wave++;
-                    waveInterval = 10; // Reset wave interval
+                    waveInterval = 10;
                 }
 
                 if (wave <= maxWaves && difficultyIncreaseInterval <= 0) {
-                    speedIncreaseFactor += 0.1; // Increase difficulty
-                    difficultyIncreaseInterval = 30; // Reset difficulty interval
+                    speedIncreaseFactor += 0.1;
+                    difficultyIncreaseInterval = 30;
                 }
             } else {
                 gameOver = true;
@@ -72,32 +82,63 @@ document.addEventListener('DOMContentLoaded', function() {
         update();
     }
 
-    // Touch event listeners
     canvas.addEventListener("touchstart", function(event) {
         if (!gameStarted) {
             startGame();
+        } else {
+            for (var i = 0; i < event.touches.length; i++) {
+                var touch = event.touches[i];
+                var rect = canvas.getBoundingClientRect();
+                var touchX = touch.clientX - rect.left;
+                var touchY = touch.clientY - rect.top;
+                if (Math.hypot(touchX - joystick.x, touchY - joystick.y) < joystick.outerRadius) {
+                    joystick.touchId = touch.identifier;
+                    joystick.touchStartX = touchX;
+                    joystick.touchStartY = touchY;
+                }
+            }
         }
     });
 
     canvas.addEventListener("touchmove", function(event) {
-        if (gameStarted && !gameOver) {
-            var touch = event.touches[0];
-            var rect = canvas.getBoundingClientRect();
-            var touchX = touch.clientX - rect.left;
-            var touchY = touch.clientY - rect.top;
+        if (gameStarted && !gameOver && joystick.touchId !== null) {
+            for (var i = 0; i < event.touches.length; i++) {
+                var touch = event.touches[i];
+                if (touch.identifier === joystick.touchId) {
+                    var rect = canvas.getBoundingClientRect();
+                    var touchX = touch.clientX - rect.left;
+                    var touchY = touch.clientY - rect.top;
 
-            // Move player based on touch position but keep it visible
-            var deltaX = touchX - player.x;
-            var deltaY = touchY - player.y;
+                    var deltaX = touchX - joystick.touchStartX;
+                    var deltaY = touchY - joystick.touchStartY;
 
-            player.dx = deltaX * 0.1;
-            player.dy = deltaY * 0.1;
+                    var distance = Math.hypot(deltaX, deltaY);
+                    if (distance > joystick.outerRadius - joystick.innerRadius) {
+                        deltaX = (deltaX / distance) * (joystick.outerRadius - joystick.innerRadius);
+                        deltaY = (deltaY / distance) * (joystick.outerRadius - joystick.innerRadius);
+                    }
+
+                    player.dx = deltaX * 0.1;
+                    player.dy = deltaY * 0.1;
+
+                    break;
+                }
+            }
         }
     });
 
-    canvas.addEventListener("touchend", function() {
-        player.dx = 0;
-        player.dy = 0;
+    canvas.addEventListener("touchend", function(event) {
+        for (var i = 0; i < event.changedTouches.length; i++) {
+            var touch = event.changedTouches[i];
+            if (touch.identifier === joystick.touchId) {
+                joystick.touchId = null;
+                joystick.touchStartX = null;
+                joystick.touchStartY = null;
+                player.dx = 0;
+                player.dy = 0;
+                break;
+            }
+        }
     });
 
     function spawnObstacle() {
@@ -151,41 +192,35 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Update player's position
         player.x += player.dx * speedIncreaseFactor;
         player.y += player.dy * speedIncreaseFactor;
 
-        // Keep player within bounds
         if (player.x < 0) player.x = 0;
         if (player.x + player.size > canvas.width) player.x = canvas.width - player.size;
         if (player.y < 0) player.y = 0;
         if (player.y + player.size > canvas.height) player.y = canvas.height - player.size;
 
-        // Draw player
         ctx.fillStyle = "blue";
         ctx.fillRect(player.x, player.y, player.size, player.size);
 
-        // Draw obstacles and check for collisions
         for (var i = 0; i < obstacles.length; i++) {
             var obs = obstacles[i];
             obs.y += 5;
             ctx.fillStyle = obs.color;
             ctx.fillRect(obs.x, obs.y, obs.size, obs.size);
 
-            // Collision check
             if (collisionDetected(player, obs)) {
                 if (obs.color === "red") {
                     gameOver = true;
                     clearInterval(timerInterval);
 
-                    // Display a random motivational message
                     var randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
                     ctx.fillStyle = "black";
                     ctx.font = "24px Montserrat";
                     ctx.textAlign = "center";
                     ctx.fillText(randomMessage, canvas.width / 2, canvas.height / 2);
 
-                    updateHighScore(); // Update high score before resetting
+                    updateHighScore();
                     setTimeout(resetGame, 2000);
                     return;
 
@@ -202,26 +237,33 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Display points and timer
         ctx.fillStyle = "black";
         ctx.font = "16px Montserrat";
         ctx.textAlign = "right";
         ctx.fillText(`Points: ${points}`, canvas.width - 10, 25);
         ctx.fillText(`Time: ${timer}s`, canvas.width - 10, 50);
-        ctx.fillText(`High Score: ${highScore}`, canvas.width - 10, 75); // Display high score
-        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, 100); // Display wave
+        ctx.fillText(`High Score: ${highScore}`, canvas.width - 10, 75);
+        ctx.fillText(`Wave: ${wave}`, canvas.width - 10, 100);
 
-        // Spawn new obstacles
         if (Math.random() < 0.05) spawnObstacle();
 
-        // Display copyright text
         displayCopyright();
+
+        // Draw joystick
+        ctx.beginPath();
+        ctx.arc(joystick.x, joystick.y, joystick.outerRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(joystick.x, joystick.y, joystick.innerRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        ctx.fill();
 
         if (!gameOver) {
             requestAnimationFrame(update);
         }
     }
 
-    // Start the game loop
     update();
 });
